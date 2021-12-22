@@ -34,8 +34,8 @@ class ConnectService:
     async def connect(self, connection_settings: ConnectionSettingsInput):
         plotter = self.plotter_repository.get_plotter()
         
-        self.actual_plotter.connect(ConnectionSettings(connection_settings.port, connection_settings.baudrate, connection_settings.timeout))
-        self.simulation_plotter.connect(ConnectionSettings(connection_settings.port, connection_settings.baudrate, connection_settings.timeout))
+        await self.actual_plotter.connect(ConnectionSettings(connection_settings.port, connection_settings.baudrate, connection_settings.timeout))
+        await self.simulation_plotter.connect(ConnectionSettings(connection_settings.port, connection_settings.baudrate, connection_settings.timeout))
         plotter.connect()
         
         self.plotter_repository.update_plotter(plotter)

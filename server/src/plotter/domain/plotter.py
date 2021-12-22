@@ -87,6 +87,8 @@ class Plotter:
             return None
         if(self.project is None):
             return None
+        if(self.project.is_active is False):
+            return None
         
         return self.project.get_current_command()
     

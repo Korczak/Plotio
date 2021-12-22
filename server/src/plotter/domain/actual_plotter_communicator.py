@@ -15,7 +15,7 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         self.position: PlotterPosition = PlotterPosition(0, 0, 0)
         
     async def get_position(self) -> PlotterPosition:
-        if(self.is_connected()):
+        if(await self.is_connected()):
             return None
         
         response = self.arduino.readline().decode()
@@ -25,7 +25,7 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         return self.position
 
     async def connect(self, connection_settings: ConnectionSettings) -> bool:
-        self.arduino = serial.Serial(port=self.connection_settings.port, baudrate=self.connection_settings.baudrate, timeout=self.connection_settings.timeout)
+        self.arduino = serial.Serial(port=connection_settings.port, baudrate=connection_settings.baudrate, timeout=connection_settings.timeout)
         self.connection_settings: ConnectionSettings = connection_settings
         return True
         
@@ -36,4 +36,4 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         return True
     
     async def send_command(self, position: PlotterPosition):
-        self.arduino.write(f"KOMENDA {position.posX}, {position.posY}, {position.isHit}")
+        self.arduino.write(f"{position.posX}, {position.posY}, {position.isHit}")

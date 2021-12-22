@@ -41,6 +41,7 @@ pylev==1.4.0
 pymitter==0.3.1
 pyparsing==3.0.6
 Pypubsub==4.0.3
+pyserial==3.5
 python-dateutil==2.8.2
 python-engineio==4.3.0
 python-socketio==5.4.1
@@ -49,7 +50,6 @@ pywin32-ctypes==0.2.0
 PyYAML==6.0
 requests==2.26.0
 requests-toolbelt==0.9.1
-serial==0.0.97
 shellingham==1.4.0
 six==1.16.0
 sniffio==1.2.0
