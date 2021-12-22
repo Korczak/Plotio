@@ -1,0 +1,1 @@
+openapi --file http://localhost:5000/openapi.json --output-dir client\src\api\

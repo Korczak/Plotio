@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\plotter",
+    "\\src\\plotter\\domain",
+    "\\src\\plotter\\infrastructure",
+    "\\src\\plotter\\usecase"
+  ],
+  "PreviewInSolutionExplorer": false
+}

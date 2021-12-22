@@ -1,0 +1,99 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>8e3698d0-cd34-464b-942c-f830d18aade0</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>main.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>Plotio</Name>
+    <RootNamespace>Plotio</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="config\container.py" />
+    <Compile Include="config\shared.py" />
+    <Compile Include="main.py" />
+    <Compile Include="src\plotter\domain\command.py" />
+    <Compile Include="src\plotter\domain\controller.py" />
+    <Compile Include="src\plotter\domain\plotter.py" />
+    <Compile Include="src\plotter\domain\plotter_communicator_interface.py" />
+    <Compile Include="src\plotter\domain\plotter_position.py" />
+    <Compile Include="src\plotter\domain\project.py" />
+    <Compile Include="src\plotter\domain\simulation_plotter_communicator.py" />
+    <Compile Include="src\plotter\domain\__init__.py" />
+    <Compile Include="src\plotter\infrastructure\plotter_dto.py" />
+    <Compile Include="src\plotter\infrastructure\plotter_repository.py" />
+    <Compile Include="src\plotter\infrastructure\__init__.py" />
+    <Compile Include="src\plotter\module.py" />
+    <Compile Include="src\plotter\plotter_controller.py" />
+    <Compile Include="src\plotter\usecase\add_project_service.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\plotter\usecase\manual_command_service.py" />
+    <Compile Include="src\plotter\usecase\plotter_position_service.py" />
+    <Compile Include="src\plotter\usecase\render_simaluation_service.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\plotter\usecase\__init__.py" />
+    <Compile Include="src\plotter\__init__.py" />
+    <Compile Include="src\__init__.py" />
+    <Compile Include="__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="config\" />
+    <Folder Include="config\__pycache__\" />
+    <Folder Include="src\" />
+    <Folder Include="src\plotter\" />
+    <Folder Include="src\plotter\domain\" />
+    <Folder Include="src\plotter\domain\__pycache__\" />
+    <Folder Include="src\plotter\infrastructure\" />
+    <Folder Include="src\plotter\infrastructure\__pycache__\" />
+    <Folder Include="src\plotter\usecase\" />
+    <Folder Include="src\plotter\usecase\__pycache__\" />
+    <Folder Include="src\plotter\__pycache__\" />
+    <Folder Include="src\__pycache__\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config\__pycache__\container.cpython-39.pyc" />
+    <Content Include="config\__pycache__\event_emmiter.cpython-39.pyc" />
+    <Content Include="config\__pycache__\shared.cpython-39.pyc" />
+    <Content Include="src\plotter\domain\__pycache__\command.cpython-39.pyc" />
+    <Content Include="src\plotter\domain\__pycache__\controller.cpython-39.pyc" />
+    <Content Include="src\plotter\domain\__pycache__\plotter.cpython-39.pyc" />
+    <Content Include="src\plotter\domain\__pycache__\plotter_communicator_interface.cpython-39.pyc" />
+    <Content Include="src\plotter\domain\__pycache__\plotter_position.cpython-39.pyc" />
+    <Content Include="src\plotter\domain\__pycache__\simulation_plotter_communicator.cpython-39.pyc" />
+    <Content Include="src\plotter\domain\__pycache__\__init__.cpython-39.pyc" />
+    <Content Include="src\plotter\infrastructure\__pycache__\plotter_dto.cpython-39.pyc" />
+    <Content Include="src\plotter\infrastructure\__pycache__\plotter_repository.cpython-39.pyc" />
+    <Content Include="src\plotter\infrastructure\__pycache__\__init__.cpython-39.pyc" />
+    <Content Include="src\plotter\usecase\__pycache__\add_plotter_service.cpython-39.pyc" />
+    <Content Include="src\plotter\usecase\__pycache__\manual_command_service.cpython-39.pyc" />
+    <Content Include="src\plotter\usecase\__pycache__\plotter_position_service.cpython-39.pyc" />
+    <Content Include="src\plotter\usecase\__pycache__\__init__.cpython-39.pyc" />
+    <Content Include="src\plotter\__pycache__\module.cpython-39.pyc" />
+    <Content Include="src\plotter\__pycache__\plotter_controller.cpython-39.pyc" />
+    <Content Include="src\plotter\__pycache__\__init__.cpython-39.pyc" />
+    <Content Include="src\__pycache__\__init__.cpython-39.pyc" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

@@ -1,0 +1,32 @@
+
+from typing import List
+from src.plotter.domain.command import Command
+from src.plotter.domain.project import Project, ProjectStatus
+from src.plotter.infrastructure.project_dto import ProjectDto
+
+
+class ProjectRepository:
+    
+    def __init__(self) -> None:
+        self._project_db: List[ProjectDto] = [] 
+        self._active_project: ProjectDto = None
+
+    def add_project(self, name: str, is_active: bool, status: ProjectStatus, commands: List[Command], image_content: str, image_shape: List[int]) -> None:
+        projectDto = ProjectDto(name, is_active, status, commands, commands, image_content, image_shape)
+
+        self._project_db.append(projectDto)
+        self._active_project = projectDto
+
+    def update_project(self, project: Project):
+        projectDto = ProjectDto(project.name, project.is_active, project.status, project.all_commands, project.commands_to_do, project.image_content, project.image_shape)
+
+        self._project_db.append(projectDto)
+        self._active_project = projectDto
+
+    def get_active_project(self) -> Project:
+        if(self._active_project is None):
+            return None
+        
+        project = self._active_project
+        
+        return Project(project.name, project.is_active, project.status, project.all_commands, project.commands_to_do, project.image_content, project.image_shape)
