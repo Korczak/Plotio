@@ -76,6 +76,8 @@ class Project:
     def complete_current_command(self) -> None:
         self.commands_to_do[0].complete_command()
         self.commands_to_do.pop(0)
+        if len(self.commands_to_do) == 0:
+            self.complete_project()
         
     def optimize_path(self, method: OptimizationMethod):        
         initial_solution = [Point(point.position.posX, point.position.posY, point.position.isHit) for point in self.all_commands]

@@ -4,7 +4,7 @@ from src.plotter.domain.actual_plotter_communicator import ActualPlotterCommunic
 from src.plotter.domain.command import Command, CommandStatus
 from pydantic import BaseModel
 from src.plotter.domain.controller import Controller, Mode
-from src.plotter.domain.plotter import PlotterStatus
+from src.plotter.domain.plotter import PlotterStatus, WorkMode
 from src.plotter.domain.plotter_position import PlotterPosition
 from src.plotter.domain.simulation_plotter_communicator import SimulationPlotterCommunicator
 
@@ -54,11 +54,11 @@ class AutomaticCommandService:
             current_command = plotter.get_current_command()
             plotter_position: PlotterPosition = None
             
-            if plotter.status == PlotterStatus.Disconnected.value:
-                await asyncio.sleep(0.1)
-                continue
-            
             if(plotter.is_work_mode()):
+                if plotter.status == PlotterStatus.Disconnected:
+                    await asyncio.sleep(0.1)
+                    continue
+            
                 plotter_position = await self.actual_plotter.get_position()
             else:
                 plotter_position = await self.simulation_plotter.get_position()

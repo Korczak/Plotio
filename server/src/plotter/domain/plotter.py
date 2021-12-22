@@ -91,9 +91,11 @@ class Plotter:
         return self.project.get_current_command()
     
     def get_next_command(self) -> Command:
-        if(self.work_mode != WorkMode.Automatic.value):
+        if(self.work_mode != WorkMode.Automatic):
             return None
         if(self.project is None):
+            return None
+        if(self.project.is_active is False):
             return None
         
         return self.project.get_next_command()
