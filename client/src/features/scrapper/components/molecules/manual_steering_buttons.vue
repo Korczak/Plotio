@@ -1,33 +1,29 @@
 <template>
   <div>
     <v-row justify="center">
-      <v-btn elevation="0" tile fab large
-        ><v-icon>mdi-arrow-top-left</v-icon></v-btn
-      >
-      <v-btn elevation="0" tile fab large @click="move('Up')"
+      <v-btn elevation="0" tile fab><v-icon>mdi-arrow-top-left</v-icon></v-btn>
+      <v-btn elevation="0" tile fab @click="move('Up')"
         ><v-icon>mdi-arrow-up</v-icon></v-btn
       >
-      <v-btn elevation="0" tile fab large
-        ><v-icon>mdi-arrow-top-right</v-icon></v-btn
-      >
+      <v-btn elevation="0" tile fab><v-icon>mdi-arrow-top-right</v-icon></v-btn>
     </v-row>
     <v-row justify="center">
-      <v-btn elevation="0" tile fab large @click="move('Left')"
+      <v-btn elevation="0" tile fab @click="move('Left')"
         ><v-icon>mdi-arrow-left</v-icon></v-btn
       >
-      <v-btn elevation="0" tile fab large disabled></v-btn>
-      <v-btn elevation="0" tile fab large @click="move('Right')"
+      <v-btn elevation="0" tile fab disabled></v-btn>
+      <v-btn elevation="0" tile fab @click="move('Right')"
         ><v-icon>mdi-arrow-right</v-icon></v-btn
       >
     </v-row>
     <v-row justify="center">
-      <v-btn elevation="0" tile fab large
+      <v-btn elevation="0" tile fab
         ><v-icon>mdi-arrow-bottom-left</v-icon></v-btn
       >
-      <v-btn elevation="0" tile fab large @click="move('Down')"
+      <v-btn elevation="0" tile fab @click="move('Down')"
         ><v-icon>mdi-arrow-down</v-icon></v-btn
       >
-      <v-btn elevation="0" tile fab large
+      <v-btn elevation="0" tile fab
         ><v-icon>mdi-arrow-bottom-right</v-icon></v-btn
       >
     </v-row>

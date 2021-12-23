@@ -1,13 +1,10 @@
 <template>
   <div>
+    <v-btn>Pozycjonowanie </v-btn>
     <div>
       <v-text-field label="X:" hide-details></v-text-field>
       <v-text-field label="Y:" hide-details></v-text-field>
-      <v-text-field label="Z:" hide-details></v-text-field>
     </div>
-    <v-card-title class="justify-center">
-      <v-btn>Pozycjonowanie </v-btn>
-    </v-card-title>
   </div>
 </template>
 

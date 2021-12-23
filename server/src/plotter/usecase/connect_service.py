@@ -1,3 +1,4 @@
+from typing import List
 from pubsub import pub
 from pymitter import EventEmitter
 from src.plotter.domain.actual_plotter_communicator import ActualPlotterCommunicator
@@ -13,13 +14,17 @@ from src.plotter.infrastructure.project_repository import ProjectRepository
 import asyncio
 from multiprocessing import Process
 import time
+import serial
 
 
 class ConnectionSettingsInput(BaseModel):
     port: str
     baudrate: int
-    timeout: float
+    timeout: float    
     
+class ConnectionSettingsResponse(BaseModel):
+    is_success: bool
+    error_message: str
     
 class ConnectService:
 
@@ -31,15 +36,22 @@ class ConnectService:
         self.actual_plotter: ActualPlotterCommunicator = actual_plotter
         self.simulation_plotter: SimulationPlotterCommunicator = simulation_plotter
 
-    async def connect(self, connection_settings: ConnectionSettingsInput):
+    async def connect(self, connection_settings: ConnectionSettingsInput) -> ConnectionSettingsResponse:
         plotter = self.plotter_repository.get_plotter()
         
-        await self.actual_plotter.connect(ConnectionSettings(connection_settings.port, connection_settings.baudrate, connection_settings.timeout))
-        await self.simulation_plotter.connect(ConnectionSettings(connection_settings.port, connection_settings.baudrate, connection_settings.timeout))
-        plotter.connect()
+        try:
+            self.actual_plotter.connect(ConnectionSettings(connection_settings.port, connection_settings.baudrate, connection_settings.timeout))
+            self.simulation_plotter.connect(ConnectionSettings(connection_settings.port, connection_settings.baudrate, connection_settings.timeout))
+        except serial.SerialException as error:
+             return ConnectionSettingsResponse(is_success=False, error_message=str(error))
         
+        plotter.connect()
         self.plotter_repository.update_plotter(plotter)
+        return ConnectionSettingsResponse(is_success=True, error_message="")
         
     async def is_connected(self) -> bool:
         plotter = self.plotter_repository.get_plotter()
         return plotter.is_connected()
+    
+    async def get_open_ports(self) -> List[str]:
+        return self.actual_plotter.get_opened_ports()

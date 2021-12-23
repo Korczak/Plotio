@@ -1,12 +1,12 @@
 <template>
   <div>
     <v-card>
-      <v-card-title class="justify-center">
+      <v-card-title class="pa-2 justify-center">
         <span>Parametry </span>
       </v-card-title>
 
-      <div>
-        <v-radio-group v-model="plotterMode">
+      <v-container class="px-2">
+        <v-radio-group v-model="plotterMode" class="py-0" hide-details>
           <v-row>
             <v-col cols="6">
               <v-radio
@@ -26,9 +26,9 @@
             </v-col>
           </v-row>
         </v-radio-group>
-        <v-text-field label="Zagłębienie"></v-text-field>
-        <v-text-field label="Prędkość obróbkix XY"></v-text-field>
-      </div>
+        <v-text-field label="Zagłębienie" hide-details></v-text-field>
+        <v-text-field label="Prędkość obróbkix XY" hide-details></v-text-field>
+      </v-container>
     </v-card>
     <connect-dialog
       :dialog.sync="dialog"

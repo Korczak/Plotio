@@ -62,11 +62,17 @@ type IsConnectedPlotterPlotterPlotterConnectGetResult0 = RequestResult<boolean>;
 export function isConnectedPlotterPlotterPlotterConnectGet(): IsConnectedPlotterPlotterPlotterConnectGetResult0;
 
 type ConnectToPlotterPlotterPlotterConnectPostParams0 = { "body"?: { "port": string; "baudrate": number; "timeout": number; }; };
-type ConnectToPlotterPlotterPlotterConnectPostResult0 = RequestResult<object>;
+type ConnectToPlotterPlotterPlotterConnectPostResult0 = RequestResult<{ "is_success": boolean; "error_message": string; }>;
 /**
 * Connect To Plotter
 */
 export function connectToPlotterPlotterPlotterConnectPost(params: ConnectToPlotterPlotterPlotterConnectPostParams0): ConnectToPlotterPlotterPlotterConnectPostResult0;
+
+type GetOpenPortsPlotterPlotterConnectPortsGetResult0 = RequestResult<(string)[]>;
+/**
+* Get Open Ports
+*/
+export function getOpenPortsPlotterPlotterConnectPortsGet(): GetOpenPortsPlotterPlotterConnectPortsGetResult0;
 
 type SendCommandPlotterCommandPostParams0 = { "body"?: { "command": string; }; };
 type SendCommandPlotterCommandPostResult0 = RequestResult<{ "isSuccess": boolean; "message": string; }>;

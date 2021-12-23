@@ -44,6 +44,10 @@ export function connectToPlotterPlotterPlotterConnectPost(params) {
   return request("post", `/plotter/plotter/connect`, { "header": { "accept": "application/json", "Content-Type": "application/json", }, })(params);
 }
 
+export function getOpenPortsPlotterPlotterConnectPortsGet() {
+  return request("get", `/plotter/plotter/connect/ports`, { "header": { "Content-Type": "application/json", }, })();
+}
+
 export function sendCommandPlotterCommandPost(params) {
   return request("post", `/plotter/command`, { "header": { "accept": "application/json", "Content-Type": "application/json", }, })(params);
 }

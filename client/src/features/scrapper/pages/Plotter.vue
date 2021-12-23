@@ -34,6 +34,11 @@
           ></simulation>
         </v-col>
       </v-row>
+      <v-row>
+        <v-col cols="12" class="pa-0">
+          <status-bar></status-bar>
+        </v-col>
+      </v-row>
     </v-container>
   </div>
 </template>
@@ -47,6 +52,7 @@ import PlotterMode from "../components/molecules/plotter_mode.vue";
 import ManualSteering from "../components/organisms/manual_steering.vue";
 import Simulation from "../components/organisms/simulation.vue";
 import ImportImage from "../components/organisms/import_image.vue";
+import StatusBar from "../components/organisms/status_bar.vue";
 //import { rootGet } from "@/api/index";
 
 @Component({
@@ -58,6 +64,7 @@ import ImportImage from "../components/organisms/import_image.vue";
     ManualSteering,
     Simulation,
     ImportImage,
+    StatusBar,
   },
 })
 export default class Plotter extends Vue {

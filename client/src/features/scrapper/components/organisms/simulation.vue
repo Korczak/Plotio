@@ -25,7 +25,7 @@ export default class Simulation extends Vue {
 
   async getActualPositionLoop() {
     while (this.positionLoop) {
-      await this.delay(200);
+      await this.delay(1000);
       await this.getActualPosition();
     }
   }

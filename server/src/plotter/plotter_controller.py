@@ -9,7 +9,7 @@ from src.plotter.infrastructure.plotter_dto import PlotterDto
 from src.plotter.domain.plotter import Plotter
 from src.plotter.module import PlotterModule
 from src.plotter.infrastructure.plotter_repository import PlotterRepository
-from src.plotter.usecase.connect_service import ConnectService, ConnectionSettingsInput
+from src.plotter.usecase.connect_service import ConnectService, ConnectionSettingsInput, ConnectionSettingsResponse
 from src.plotter.usecase.manual_command_service import ManualCommandInput, ManualCommandResponse, ManualCommandService
 from src.plotter.usecase.project_service import ProjectService
 from src.plotter.usecase.render_simaluation_service import PlotterPosition, RenderSimulationService
@@ -80,10 +80,15 @@ async def get_work_mode(service: PlotterModeService = dependency(Container.plott
 async def is_connected_plotter(service: ConnectService = dependency(Container.plotter.connect_service)):
     return await service.is_connected()
 
-@router.post("/plotter/connect")
+@router.get("/plotter/connect/ports", response_model=List[str])
+@inject
+async def get_open_ports(service: ConnectService = dependency(Container.plotter.connect_service)):
+    return await service.get_open_ports()
+
+@router.post("/plotter/connect", response_model=ConnectionSettingsResponse)
 @inject
 async def connect_to_plotter(input: ConnectionSettingsInput, service: ConnectService = dependency(Container.plotter.connect_service)):
-    await service.connect(input)
+    return await service.connect(input)
 
 
 @router.post("/command", response_model=ManualCommandResponse)

@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card>
-      <v-row class="pt-5">
+      <v-row class="pt-2">
         <v-col cols="6">
           <manual-steering-buttons></manual-steering-buttons>
         </v-col>
