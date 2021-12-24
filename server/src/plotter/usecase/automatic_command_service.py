@@ -4,7 +4,8 @@ from src.plotter.domain.actual_plotter_communicator import ActualPlotterCommunic
 from src.plotter.domain.command import Command, CommandStatus
 from pydantic import BaseModel
 from src.plotter.domain.controller import Controller, Mode
-from src.plotter.domain.plotter import PlotterStatus, WorkMode
+from src.plotter.domain.plotter import Plotter, PlotterStatus, WorkMode
+from src.plotter.domain.plotter_communicator_interface import PlotterResponse
 from src.plotter.domain.plotter_position import PlotterPosition
 from src.plotter.domain.simulation_plotter_communicator import SimulationPlotterCommunicator
 
@@ -54,26 +55,32 @@ class AutomaticCommandService:
             current_command = plotter.get_current_command()
             plotter_position: PlotterPosition = None
             
-            #print("czytam")
-            if(plotter.is_work_mode()):
-                #print("arduino1")
-                if plotter.status == PlotterStatus.Disconnected:
-                    await asyncio.sleep(0.1)
-                    continue
-                #print("arduino2")
-
-                plotter_response = self.actual_plotter.get_response()
-                if plotter_response != None:
-                    plotter_position = plotter_response.position
-            else:
-                plotter_response = self.simulation_plotter.get_response()
-                if plotter_response != None:
-                    plotter_position = plotter_response.position
+            is_response_received = True
+            while(is_response_received):            
+                is_response_received = await self.receive_response(plotter, current_command, plotter_position)
                 
-            if(plotter_position is not None):
-                pub.sendMessage('PositionUpdated', arg1=plotter_position)
-            if(current_command is not None and plotter_response != None and plotter_response.isCommandDone == True):
-                pub.sendMessage('CommandDone', arg1=plotter_position)
-            
             await asyncio.sleep(0.1)
+
+    async def receive_response(self, plotter: Plotter, current_command: Command, plotter_position: PlotterPosition) -> bool:
+        is_response_received = False;
         
+        if(plotter.is_work_mode()):
+            if plotter.status == PlotterStatus.Disconnected:
+                await asyncio.sleep(0.1)
+                return False
+
+            plotter_response = self.actual_plotter.get_response()
+            if plotter_response != None:
+                plotter_position = plotter_response.position
+                is_response_received = True
+        else:
+            plotter_response = self.simulation_plotter.get_response()
+            if plotter_response != None:
+                plotter_position = plotter_response.position
+                
+        if(plotter_position is not None):
+            pub.sendMessage('PositionUpdated', arg1=plotter_position)
+        if(current_command is not None and plotter_response != None and plotter_response.isCommandDone == True):
+            pub.sendMessage('CommandDone', arg1=plotter_position)
+        
+        return is_response_received
