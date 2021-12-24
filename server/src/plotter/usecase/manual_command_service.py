@@ -2,12 +2,12 @@ from pymitter import EventEmitter
 from src.plotter.domain.command import Command
 from src.plotter.domain.controller import Controller, Mode
 from src.plotter.domain.plotter_position import PlotterPosition
-from src.plotter.domain.simulation_plotter_communicator import SimulationPlotterCommunicator
 from src.plotter.infrastructure.plotter_dto import PlotterDto
 from src.plotter.domain.plotter import Plotter, PlotterStatus
 from src.plotter.infrastructure.plotter_repository import PlotterRepository
 from pydantic import BaseModel
-
+from src.plotter.domain.simulation_plotter_communicator import SimulationPlotterCommunicator
+from src.plotter.domain.actual_plotter_communicator import ActualPlotterCommunicator
 
 class ManualCommandInput(BaseModel):
     command: str
@@ -18,9 +18,11 @@ class ManualCommandResponse(BaseModel):
 
 class ManualCommandService:
 
-    def __init__(self, repository: PlotterRepository, event_emitter: EventEmitter) -> None:
+    def __init__(self, repository: PlotterRepository, event_emitter: EventEmitter, actual_plotter: ActualPlotterCommunicator, simulation_plotter: SimulationPlotterCommunicator) -> None:
         self.plotter_repository: PlotterRepository = repository
         self.event_emitter = event_emitter
+        self.actual_plotter: ActualPlotterCommunicator = actual_plotter
+        self.simulation_plotter: SimulationPlotterCommunicator = simulation_plotter
 
     async def send_command(self, input: ManualCommandInput) -> None:
         plotter = self.plotter_repository.get_plotter()
@@ -40,5 +42,8 @@ class ManualCommandService:
         else:
             return ManualCommandResponse(False)
 
-        await controller.update_position(command, plotter_communicator=SimulationPlotterCommunicator(), eventEmitter=self.event_emitter)
+        if(plotter.is_work_mode()):
+            self.actual_plotter.send_command(command.position)
+        else:
+            self.simulation_plotter.send_command(command.position)
         return ManualCommandResponse(isSuccess=True, message="Command sent")

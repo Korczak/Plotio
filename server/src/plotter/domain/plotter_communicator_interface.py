@@ -10,8 +10,14 @@ class ConnectionSettings:
         self.baudrate: int = baudrate
         self.timeout: float = timeout
 
+class PlotterResponse:
+    def __init__(self, alarmStatus: bool, isCommandDone: bool, position: PlotterPosition) -> None:
+        self.alarmStatus: bool = alarmStatus
+        self.isCommandDone: int = isCommandDone
+        self.position: PlotterPosition = position
+
 class PlotterCommunicatorInterface:
-    async def get_position(self) -> PlotterPosition:
+    async def get_response(self) -> PlotterResponse:
         pass
     async def connect(self, connection_settings: ConnectionSettings) -> bool:
         pass

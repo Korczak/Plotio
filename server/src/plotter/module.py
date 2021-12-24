@@ -61,7 +61,9 @@ class PlotterModule(containers.DeclarativeContainer):
     manual_command_service = providers.Singleton(
         ManualCommandService,
         repository=plotter_repository,
-        event_emitter=providers.ProvidedInstance(EventEmitter)
+        event_emitter=providers.ProvidedInstance(EventEmitter),
+        actual_plotter = actual_plotter,
+        simulation_plotter = simulation_plotter
     )
 
     image_adapter = providers.Singleton(

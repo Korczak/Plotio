@@ -39,9 +39,9 @@ class AutomaticCommandService:
                     
                     controller = Controller(mode = Mode.Automatic, plotter= plotter)
                     if(plotter.is_work_mode()):
-                        await self.actual_plotter.send_command(command.position)
+                        self.actual_plotter.send_command(command.position)
                     else:
-                        await self.simulation_plotter.send_command(command.position)
+                        self.simulation_plotter.send_command(command.position)
                         
                     
                     self.plotter_repository.update_plotter(plotter)
@@ -54,18 +54,25 @@ class AutomaticCommandService:
             current_command = plotter.get_current_command()
             plotter_position: PlotterPosition = None
             
+            #print("czytam")
             if(plotter.is_work_mode()):
+                #print("arduino1")
                 if plotter.status == PlotterStatus.Disconnected:
                     await asyncio.sleep(0.1)
                     continue
-            
-                plotter_position = await self.actual_plotter.get_position()
+                #print("arduino2")
+
+                plotter_response = self.actual_plotter.get_response()
+                if plotter_response != None:
+                    plotter_position = plotter_response.position
             else:
-                plotter_position = await self.simulation_plotter.get_position()
+                plotter_response = self.simulation_plotter.get_response()
+                if plotter_response != None:
+                    plotter_position = plotter_response.position
                 
             if(plotter_position is not None):
                 pub.sendMessage('PositionUpdated', arg1=plotter_position)
-            if(current_command is not None and plotter_position == current_command.position):
+            if(current_command is not None and plotter_response != None and plotter_response.isCommandDone == True):
                 pub.sendMessage('CommandDone', arg1=plotter_position)
             
             await asyncio.sleep(0.1)
