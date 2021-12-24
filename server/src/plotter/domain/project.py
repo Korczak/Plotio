@@ -28,7 +28,7 @@ class Project:
     def __init__(self, name: str, commands: List[Command]) -> None:
         self.name = name
         self.status: ProjectStatus = ProjectStatus.NotStarted
-        self.all_commands: List[Command] = commands
+        self.all_commands: List[Command] = commands.copy()
         self.commands_to_do: List[Command] = []
         self.is_active = True
         self.image_content = None
@@ -37,13 +37,16 @@ class Project:
         self.name = name
         self.is_active: bool = is_active
         self.status: ProjectStatus = status
-        self.all_commands: List[Command] = all_commands
-        self.commands_to_do: List[Command] = commands_to_do
+        self.all_commands: List[Command] = all_commands.copy()
+        self.commands_to_do: List[Command] = commands_to_do.copy()
         self.image_content: str = image_content
         self.image_shape: List[int] = image_shape
 
     def load_image(self, image_content: str):
         self.image_content = image_content
+
+    def is_completed_project(self):
+        return self.status == ProjectStatus.Completed
 
     def complete_project(self):
         self.is_active = False
@@ -54,13 +57,13 @@ class Project:
         self.status = ProjectStatus.Stopped
         
     def start_project(self) -> bool:
-        if(len(self.commands_to_do) != 0 and self.status == ProjectStatus.Ready):
+        if(len(self.commands_to_do) != 0 and (self.status == ProjectStatus.Ready or self.status == ProjectStatus.Paused)):
             self.status = ProjectStatus.Running
             return True
         return False
 
     def pause_project(self):
-        self.status = ProjectStatus.Stopped
+        self.status = ProjectStatus.Paused
 
     def get_current_command(self) -> Command:
         if self.commands_to_do[0].is_running_command():

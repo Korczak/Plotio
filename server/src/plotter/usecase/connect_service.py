@@ -2,12 +2,14 @@ from typing import List
 from pubsub import pub
 from pymitter import EventEmitter
 from src.plotter.domain.actual_plotter_communicator import ActualPlotterCommunicator
+from src.plotter.domain.alert import Alert, AlertType
 from src.plotter.domain.command import Command, CommandStatus
 from pydantic import BaseModel
 from src.plotter.domain.controller import Controller, Mode
 from src.plotter.domain.plotter_communicator_interface import ConnectionSettings
 from src.plotter.domain.plotter_position import PlotterPosition
 from src.plotter.domain.simulation_plotter_communicator import SimulationPlotterCommunicator
+from src.plotter.infrastructure.alert_repository import AlertRepository
 
 from src.plotter.infrastructure.plotter_repository import PlotterRepository
 from src.plotter.infrastructure.project_repository import ProjectRepository
@@ -31,11 +33,13 @@ class ConnectService:
     def __init__(self,
                  plotter_repository: PlotterRepository,
                  actual_plotter: ActualPlotterCommunicator,
-                 simulation_plotter: SimulationPlotterCommunicator) -> None:
+                 simulation_plotter: SimulationPlotterCommunicator,
+                 alert_repository: AlertRepository) -> None:
         self.plotter_repository: PlotterRepository = plotter_repository
         self.actual_plotter: ActualPlotterCommunicator = actual_plotter
         self.simulation_plotter: SimulationPlotterCommunicator = simulation_plotter
-
+        self.alert_repository: AlertRepository = alert_repository
+        
     async def connect(self, connection_settings: ConnectionSettingsInput) -> ConnectionSettingsResponse:
         plotter = self.plotter_repository.get_plotter()
         
@@ -47,6 +51,7 @@ class ConnectService:
         
         plotter.connect()
         self.plotter_repository.update_plotter(plotter)
+        self.alert_repository.add_alert(Alert("Połączono się z arduino", AlertType.Success))
         return ConnectionSettingsResponse(is_success=True, error_message="")
         
     async def is_connected(self) -> bool:

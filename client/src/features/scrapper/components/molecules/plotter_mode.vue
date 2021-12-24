@@ -1,14 +1,14 @@
 <template>
   <div>
     <v-card>
-      <v-card-title class="pa-2 justify-center">
+      <v-card-title class="pa-2 pb-0 justify-center">
         <span>Parametry </span>
       </v-card-title>
 
       <v-container class="px-2">
         <v-radio-group v-model="plotterMode" class="py-0" hide-details>
           <v-row>
-            <v-col cols="6">
+            <v-col cols="6" class="pt-0">
               <v-radio
                 :ripple="false"
                 label="Tryb pracy"
@@ -16,7 +16,7 @@
                 @click="selectWorkMode"
               ></v-radio>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="6" class="pt-0">
               <v-radio
                 :ripple="false"
                 label="Tryb symulacji"
@@ -26,14 +26,39 @@
             </v-col>
           </v-row>
         </v-radio-group>
-        <v-text-field label="Zagłębienie" hide-details></v-text-field>
-        <v-text-field label="Prędkość obróbkix XY" hide-details></v-text-field>
+        <v-row>
+          <v-col cols="9">
+            <v-text-field
+              v-model="speedOfZ"
+              type="number"
+              label="Zagłębienie"
+              hide-details
+            ></v-text-field>
+            <v-text-field
+              v-model="speedOfMotors"
+              type="number"
+              label="Prędkość obróbki XY"
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="3" class="px-0">
+            <v-btn
+              color="success"
+              class="px-2 mt-5"
+              max-width="80px"
+              height="80px"
+              @click="setPlotterSettings"
+              >Zapisz</v-btn
+            >
+          </v-col>
+        </v-row>
       </v-container>
     </v-card>
     <connect-dialog
       :dialog.sync="dialog"
       @onConnect="onConnect"
     ></connect-dialog>
+    <error-snackbar v-model="error" :text="errorMessage"></error-snackbar>
   </div>
 </template>
 
@@ -42,6 +67,7 @@ import {
   getModePlotterPlotterModeGet,
   isConnectedPlotterPlotterPlotterConnectGet,
   setModePlotterPlotterModePost,
+  setPlotterSettingsPlotterPlotterSettingsPost,
 } from "@/api/index";
 import { Component, Vue } from "vue-property-decorator";
 import ConnectDialog from "./connect_dialog.vue";
@@ -51,6 +77,12 @@ export default class PlotterMode extends Vue {
   plotterMode: "Simulation" | "Work" = "Simulation";
   isConnected: boolean = false;
   dialog: boolean = false;
+
+  speedOfMotors: number = 0;
+  speedOfZ: number = 0;
+
+  error: boolean = false;
+  errorMessage: string = "";
 
   async mounted() {
     let plotterMode = await getModePlotterPlotterModeGet();
@@ -90,6 +122,20 @@ export default class PlotterMode extends Vue {
         input: this.plotterMode,
       },
     });
+  }
+
+  async setPlotterSettings() {
+    const response = await setPlotterSettingsPlotterPlotterSettingsPost({
+      body: {
+        speedOfMotors: this.speedOfMotors,
+        speedOfZ: this.speedOfZ,
+      },
+    });
+
+    if (!response.data.is_success) {
+      this.error = true;
+      this.errorMessage = response.data.message;
+    }
   }
 }
 </script>

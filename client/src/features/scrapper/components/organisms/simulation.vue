@@ -5,16 +5,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 import CanvasDrawer from "../atoms/canvas-drawer";
 import {
   getPositionPlotterPositionGet,
   getProjectImagePlotterProjectCurrentImageGet,
 } from "@/api/index";
 import Position from "../atoms/position";
+import RetrieverLoop from "../atoms/retriever-loop";
 
 @Component({ components: {} })
-export default class Simulation extends Vue {
+export default class Simulation extends Mixins(RetrieverLoop) {
   @Prop() readonly width!: number;
   @Prop() readonly height!: number;
 
@@ -22,19 +23,6 @@ export default class Simulation extends Vue {
   plotterPosition: Position = { x: 0, y: 0 };
 
   positionLoop: boolean = true;
-
-  async getActualPositionLoop() {
-    while (this.positionLoop) {
-      await this.delay(1000);
-      await this.getActualPosition();
-    }
-  }
-
-  delay(milliseconds: number) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, milliseconds);
-    });
-  }
 
   async getActualPosition() {
     let plotterPosition = await getPositionPlotterPositionGet();
@@ -60,7 +48,7 @@ export default class Simulation extends Vue {
     this.canvas = document.querySelector("#my-canvas") as any;
     this.context = this.canvas.getContext("2d");
     this.redrawCanvas();
-    this.getActualPositionLoop();
+    this.retrieve_loop(this.getActualPosition);
     this.context.scale(1, 1);
     let imageContent = await getProjectImagePlotterProjectCurrentImageGet();
     if (imageContent.data != null) {
@@ -89,3 +77,6 @@ export default class Simulation extends Vue {
 </script>
 
 <style scoped></style>
+
+function RetrieverLoop(RetrieverLoop: any) { throw new Error("Function not
+implemented."); }

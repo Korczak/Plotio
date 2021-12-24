@@ -11,7 +11,9 @@
       <v-btn elevation="0" tile fab @click="move('Left')"
         ><v-icon>mdi-arrow-left</v-icon></v-btn
       >
-      <v-btn elevation="0" tile fab disabled></v-btn>
+      <v-btn elevation="0" tile fab @click="move('Hit')"
+        ><v-icon>mdi-flash</v-icon></v-btn
+      >
       <v-btn elevation="0" tile fab @click="move('Right')"
         ><v-icon>mdi-arrow-right</v-icon></v-btn
       >

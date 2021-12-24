@@ -10,6 +10,7 @@ import serial.tools.list_ports
 import asyncio
 import json
 
+from src.plotter.domain.plotter_settings import PlotterSettings
 
 class ActualPlotterCommunicator(PlotterCommunicatorInterface):
     def __init__(self) -> None:
@@ -17,10 +18,8 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         self.position: PlotterPosition = PlotterPosition(0, 0, 0)
         
     def get_response(self) -> PlotterResponse:
-        #print("elo1")
         if(self.is_connected() == False):
             return None
-        #print("elo2")
         try:
             response = self.arduino.readline().decode()
             print(response)
@@ -54,7 +53,14 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         return myports
     
     def send_command(self, position: PlotterPosition):
-        text = f"{position.posX},{position.posY},{position.isHit}".encode()
-        print(text)
+        text = f"KOMENDA:{position.posX},{position.posY},{position.isHit}".encode()
         self.arduino.write(text)
+        
+    def send_settings(self, settings: PlotterSettings):
+        command = f"USTAWIENIA:{settings.speed_of_motors},{settings.speed_of_Z}".encode()
+        self.arduino.write(command)
+        
+    def positioning(self):
+        command = "POZYCJONOWANIE".encode()
+        self.arduino.write(command)
 

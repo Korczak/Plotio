@@ -81,6 +81,50 @@ type SendCommandPlotterCommandPostResult0 = RequestResult<{ "isSuccess": boolean
 */
 export function sendCommandPlotterCommandPost(params: SendCommandPlotterCommandPostParams0): SendCommandPlotterCommandPostResult0;
 
+type MoveToPositionPlotterCommandMoveToPostParams0 = { "body"?: { "position": number; "direction": "X" | "Y"; }; };
+type MoveToPositionPlotterCommandMoveToPostResult0 = RequestResult<{ "isSuccess": boolean; "message": string; }>;
+/**
+* Move To Position
+*/
+export function moveToPositionPlotterCommandMoveToPost(params: MoveToPositionPlotterCommandMoveToPostParams0): MoveToPositionPlotterCommandMoveToPostResult0;
+
+type PositioningPlotterCommandPositioningPostResult0 = RequestResult<{ "isSuccess": boolean; "message": string; }>;
+/**
+* Positioning
+*/
+export function positioningPlotterCommandPositioningPost(): PositioningPlotterCommandPositioningPostResult0;
+
+type ZeroingPlotterCommandZeroingPostResult0 = RequestResult<{ "isSuccess": boolean; "message": string; }>;
+/**
+* Zeroing
+*/
+export function zeroingPlotterCommandZeroingPost(): ZeroingPlotterCommandZeroingPostResult0;
+
+type GetAlertsPlotterAlertsGetResult0 = RequestResult<{ "alerts": ({ "text": string; "type": "Error" | "Warning" | "Success"; })[]; }>;
+/**
+* Get Alerts
+*/
+export function getAlertsPlotterAlertsGet(): GetAlertsPlotterAlertsGetResult0;
+
+type GetProgressInfoPlotterProgressInfoGetResult0 = RequestResult<{ "commandsDone": number; "commandsTotal": number; }>;
+/**
+* Get Progress Info
+*/
+export function getProgressInfoPlotterProgressInfoGet(): GetProgressInfoPlotterProgressInfoGetResult0;
+
+type GetPlotterSettingsPlotterPlotterSettingsGetResult0 = RequestResult<{ "speedOfMotors": number; "speedOfZ": number; }>;
+/**
+* Get Plotter Settings
+*/
+export function getPlotterSettingsPlotterPlotterSettingsGet(): GetPlotterSettingsPlotterPlotterSettingsGetResult0;
+
+type SetPlotterSettingsPlotterPlotterSettingsPostParams0 = { "body"?: { "speedOfMotors": number; "speedOfZ": number; }; };
+type SetPlotterSettingsPlotterPlotterSettingsPostResult0 = RequestResult<{ "is_success": boolean; "message": string; }>;
+/**
+* Set Plotter Settings
+*/
+export function setPlotterSettingsPlotterPlotterSettingsPost(params: SetPlotterSettingsPlotterPlotterSettingsPostParams0): SetPlotterSettingsPlotterPlotterSettingsPostResult0;
+
 type AddImageImageAddImagePostParams0 = { "body"?: { "name": string; "content": string; }; };
 type AddImageImageAddImagePostResult0 = RequestResult<object>;
 /**

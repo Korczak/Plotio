@@ -1,9 +1,14 @@
 <template>
   <div>
     <bar title="Komunikaty">
-      <v-virtual-scroll :items="items" height="auto" item-height="20">
+      <v-virtual-scroll
+        :items="items"
+        min-height="60px"
+        height="100px"
+        item-height="24"
+      >
         <template v-slot:default="{ item }">
-          {{ item }}
+          <p :class="getItemClass(item) + ' white--text'">{{ item.text }}</p>
         </template>
       </v-virtual-scroll>
     </bar>
@@ -11,15 +16,35 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { getAlertsPlotterAlertsGet } from "@/api";
+import { Component, Mixins } from "vue-property-decorator";
+import RetrieverLoop from "../atoms/retriever-loop";
+
+interface Alert {
+  text: string;
+  type: "Error" | "Warning" | "Success";
+}
 
 @Component({ components: {} })
-export default class MessagesBar extends Vue {
-  items: string[] = [
-    "Komunikat 1 BARDZO DLUGI DLUGOSCI",
-    "Komunikat 2",
-    "Komunikat 3",
-  ];
+export default class MessagesBar extends Mixins(RetrieverLoop) {
+  items: Alert[] = [{ text: "A", type: "Error" }];
+
+  async mounted() {
+    this.retrieve_loop(this.getAlerts);
+  }
+
+  async getAlerts() {
+    let alerts = await getAlertsPlotterAlertsGet();
+
+    this.items = alerts.data.alerts;
+  }
+
+  getItemClass(item: Alert): string {
+    if (item.type == "Success") return "success";
+    if (item.type == "Error") return "error";
+    if (item.type == "Warning") return "warning";
+    return "white";
+  }
 }
 </script>
 

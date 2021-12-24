@@ -52,6 +52,34 @@ export function sendCommandPlotterCommandPost(params) {
   return request("post", `/plotter/command`, { "header": { "accept": "application/json", "Content-Type": "application/json", }, })(params);
 }
 
+export function moveToPositionPlotterCommandMoveToPost(params) {
+  return request("post", `/plotter/command/move-to`, { "header": { "accept": "application/json", "Content-Type": "application/json", }, })(params);
+}
+
+export function positioningPlotterCommandPositioningPost() {
+  return request("post", `/plotter/command/positioning`, { "header": { "Content-Type": "application/json", }, })();
+}
+
+export function zeroingPlotterCommandZeroingPost() {
+  return request("post", `/plotter/command/zeroing`, { "header": { "Content-Type": "application/json", }, })();
+}
+
+export function getAlertsPlotterAlertsGet() {
+  return request("get", `/plotter/alerts`, { "header": { "Content-Type": "application/json", }, })();
+}
+
+export function getProgressInfoPlotterProgressInfoGet() {
+  return request("get", `/plotter/progress/info`, { "header": { "Content-Type": "application/json", }, })();
+}
+
+export function getPlotterSettingsPlotterPlotterSettingsGet() {
+  return request("get", `/plotter/plotter/settings`, { "header": { "Content-Type": "application/json", }, })();
+}
+
+export function setPlotterSettingsPlotterPlotterSettingsPost(params) {
+  return request("post", `/plotter/plotter/settings`, { "header": { "accept": "application/json", "Content-Type": "application/json", }, })(params);
+}
+
 export function addImageImageAddImagePost(params) {
   return request("post", `/image/add-image`, { "header": { "accept": "application/json", "Content-Type": "application/json", }, })(params);
 }

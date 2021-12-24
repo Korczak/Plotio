@@ -1,25 +1,36 @@
 <template>
   <div>
-    <v-snackbar v-model="value" :timeout="timeout">
+    <v-snackbar v-model="model" :timeout="timeout" :color="color">
       {{ text }}
 
       <template v-slot:action="{ attrs }">
-        <v-btn color="error" text v-bind="attrs" @click="value = false">
-          Close
-        </v-btn>
+        <v-btn text v-bind="attrs" @click="model = false"> Zamknij </v-btn>
       </template>
     </v-snackbar>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Model, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component({ components: {} })
 export default class ErrorSnackbar extends Vue {
+  @Prop({ default: "error" }) readonly color!: string;
   @Prop({ default: 5000 }) readonly timeout!: number;
   @Prop() readonly text!: string;
-  @Model() readonly value!: boolean;
+  @Prop() value: Boolean | undefined;
+
+  model: Boolean = false;
+
+  @Watch("value")
+  onValueChanged(val: Boolean) {
+    this.model = val;
+  }
+
+  @Watch("model")
+  onInformationEnd(val: Boolean) {
+    this.$emit("input", val);
+  }
 }
 </script>
 

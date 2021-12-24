@@ -17,10 +17,10 @@
           </v-card-text>
           <v-card-actions>
             <v-btn color="error" tile @click="dialogSync = false">
-              Close
+              Anuluj
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn color="success" tile @click="saveImage()"> Save </v-btn>
+            <v-btn color="success" tile @click="saveImage()"> Zapisz </v-btn>
           </v-card-actions>
         </v-card>
       </v-form>

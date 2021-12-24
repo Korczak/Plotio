@@ -1,3 +1,4 @@
+from enum import Enum
 from pymitter import EventEmitter
 from src.plotter.domain.command import Command
 from src.plotter.domain.controller import Controller, Mode
@@ -9,6 +10,14 @@ from pydantic import BaseModel
 from src.plotter.domain.simulation_plotter_communicator import SimulationPlotterCommunicator
 from src.plotter.domain.actual_plotter_communicator import ActualPlotterCommunicator
 
+
+class DirectionEnum(str, Enum):
+    X = 'X'
+    Y = 'Y'
+class PositionCommandInput(BaseModel):
+    position: int
+    direction: DirectionEnum
+    
 class ManualCommandInput(BaseModel):
     command: str
 
@@ -39,6 +48,8 @@ class ManualCommandService:
             command = Command(position=PlotterPosition(current_position.posX - move_amount, current_position.posY, 0))
         elif(input.command == "Right"):
             command = Command(position=PlotterPosition(current_position.posX + move_amount, current_position.posY, 0))
+        elif(input.command == "Hit"):
+            command = Command(position=PlotterPosition(current_position.posX, current_position.posY, 1))
         else:
             return ManualCommandResponse(False)
 
@@ -46,4 +57,40 @@ class ManualCommandService:
             self.actual_plotter.send_command(command.position)
         else:
             self.simulation_plotter.send_command(command.position)
+        return ManualCommandResponse(isSuccess=True, message="Command sent")
+    
+    async def move_to(self, input: PositionCommandInput) -> None:
+        plotter = self.plotter_repository.get_plotter()
+        controller = Controller(mode = Mode.Manual, plotter= plotter)
+        current_position = plotter.position
+
+        if(input.direction == DirectionEnum.X):
+            command = Command(position=PlotterPosition(input.position, current_position.posY, 0))
+        elif(input.direction == DirectionEnum.Y):
+            command = Command(position=PlotterPosition(current_position.posX, input.position, 0))
+            
+        if(plotter.is_work_mode()):
+            self.actual_plotter.send_command(command.position)
+        else:
+            self.simulation_plotter.send_command(command.position)
+        return ManualCommandResponse(isSuccess=True, message="Command sent")
+    
+    async def positioning(self) -> ManualCommandResponse:
+        plotter = self.plotter_repository.get_plotter()
+        controller = Controller(mode = Mode.Manual, plotter= plotter)
+        current_position = plotter.position
+            
+        if(plotter.is_work_mode()):
+            self.actual_plotter.positioning()
+        else:
+            return ManualCommandResponse(isSuccess=False, message="Nie można przeprowadzić pozycjonowania w symulacji")
+        return ManualCommandResponse(isSuccess=True, message="Command sent")
+    
+    async def zeroing(self) -> ManualCommandResponse:
+        plotter = self.plotter_repository.get_plotter()
+            
+        if(plotter.is_work_mode()):
+            self.actual_plotter.send_command(PlotterPosition(0, 0, 0))
+        else:
+            self.simulation_plotter.send_command(PlotterPosition(0, 0, 0))
         return ManualCommandResponse(isSuccess=True, message="Command sent")
