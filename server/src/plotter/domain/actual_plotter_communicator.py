@@ -40,24 +40,23 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         return False
         
     def is_connected(self) -> bool:
-        return self.connected
-        #myports = [tuple(p) for p in list(serial.tools.list_ports.comports())]
-        #print(myports[0,0])
-        #if self.connection_settings.port not in myports:
-        #    return False
-        #return True
+        myports = [p.device for p in list(serial.tools.list_ports.comports())]
+        if self.connection_settings.port not in myports:
+            return False
+        return True
     
     def get_opened_ports(self) -> List[str]:
-        myports = [tuple(p) for p in list(serial.tools.list_ports.comports())]
-        print(myports)
+        myports = [p.device for p in list(serial.tools.list_ports.comports())]
         return myports
     
     def send_command(self, position: PlotterPosition):
-        text = f"KOMENDA:{position.posX},{position.posY},{position.isHit}".encode()
+        text = f"KOMENDA,{position.posX},{position.posY},{position.isHit}".encode()
+        print(text)
         self.arduino.write(text)
+        self.arduino.flush()
         
     def send_settings(self, settings: PlotterSettings):
-        command = f"USTAWIENIA:{settings.speed_of_motors},{settings.speed_of_Z}".encode()
+        command = f"USTAWIENIA,{settings.speed_of_motors},{settings.speed_of_Z}".encode()
         self.arduino.write(command)
         
     def positioning(self):

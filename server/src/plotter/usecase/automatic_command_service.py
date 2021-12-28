@@ -58,7 +58,8 @@ class AutomaticCommandService:
             is_response_received = True
             while(is_response_received):            
                 is_response_received = await self.receive_response(plotter, current_command, plotter_position)
-                
+                await asyncio.sleep(0.001)
+
             await asyncio.sleep(0.1)
 
     async def receive_response(self, plotter: Plotter, current_command: Command, plotter_position: PlotterPosition) -> bool:

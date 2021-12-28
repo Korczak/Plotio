@@ -40,8 +40,10 @@ class PlotterModule(containers.DeclarativeContainer):
     plotter_repository=providers.Singleton(PlotterRepository, project_repository=project_repository)
     alert_repository = providers.Singleton(AlertRepository)
     plotter_settings_repository = providers.Singleton(PlotterSettingsRepository)
+    actual_plotter = providers.Singleton(ActualPlotterCommunicator)
+    simulation_plotter = providers.Singleton(SimulationPlotterCommunicator)
     
-    plotter_position_service = providers.Singleton(PlotterPositionService, repository=plotter_repository, alert_repository=alert_repository)
+    plotter_position_service = providers.Singleton(PlotterPositionService, repository=plotter_repository, alert_repository=alert_repository, actual_plotter = actual_plotter, simulation_plotter = simulation_plotter)
     render_simulation_service = providers.Singleton(RenderSimulationService, plotter_repository=plotter_repository, project_repository=project_repository)
     plotter_mode_service = providers.Singleton(PlotterModeService, plotter_repository=plotter_repository)
     project_service = providers.Singleton(ProjectService, plotter_repository=plotter_repository, project_repository = project_repository, alert_repository=alert_repository)
@@ -49,8 +51,6 @@ class PlotterModule(containers.DeclarativeContainer):
     alert_service = providers.Singleton(AlertService, alert_repository=alert_repository)    
     progress_info_service = providers.Singleton(ProgressInfoService, plotter_repository=plotter_repository)
     
-    actual_plotter = providers.Singleton(ActualPlotterCommunicator)
-    simulation_plotter = providers.Singleton(SimulationPlotterCommunicator)
     
     automatic_command_service = providers.Singleton(AutomaticCommandService, 
                                                     plotter_repository=plotter_repository, 
