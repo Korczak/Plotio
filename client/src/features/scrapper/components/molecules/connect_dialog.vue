@@ -76,7 +76,7 @@ export default class ConnectDialog extends Vue {
       body: {
         port: this.port!,
         baudrate: this.baudrate,
-        timeout: this.baudrate,
+        timeout: this.timeout,
       },
     });
     this.connecting = false;
