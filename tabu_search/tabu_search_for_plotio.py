@@ -1,43 +1,7 @@
 from typing import List
-import math 
+import math
 
-
-class Point:
-    def __init__(self, posX: float, posY: float) -> None:
-        self.posX: float = posX
-        self.posY: float = posY
-        
-    def __str__(self) -> str:
-        return f"({self.posX}, {self.posY})"
-    
-    def __eq__(self, other: object) -> bool:
-        return self.posX == other.posX and self.posY == other.posY
-
-class Move:
-    def __init__(self, point_a: Point, point_b: Point) -> None:
-        self.point_a = point_a
-        self.point_b = point_b
-        
-    def __str__(self) -> str:
-        return f"({self.point_a.posX}, {self.point_a.posY}) -> ({self.point_b.posX}, {self.point_b.posY})"
-    
-    def __eq__(self, other: object) -> bool:
-        if self.point_a == other.point_a and self.point_b == other.point_b:
-            return True
-        
-        if self.point_a == other.point_b and self.point_b == other.point_a:
-            return True
-        
-        return False
-
-class PossibleMove:
-    def __init__(self, move, value) -> None:
-        self.move : Move = move
-        self.value : int = value     
-        
-    def __lt__(self, other):
-        return self.value < other.value
-
+from optim_utils import * 
 
 class PlotioTabuSearch():
     def __init__(self, initial_solution: List[Point], tabu_tenure: int, is_first_and_last_element_static: bool = True) -> None:
