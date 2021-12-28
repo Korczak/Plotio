@@ -1,6 +1,12 @@
 import enum
 from typing import List, Optional
+
+from numpy import ndarray
+from numpy.core.fromnumeric import argmin
 from src.plotter.domain.command import Command
+from src.plotter.domain.command_group import CommandGroup
+from src.plotter.domain.opimization_utils import OptimizerSettings, calculate_value_of_commands, swap_points
+from src.plotter.domain.optimization.nearest_objects import get_nearest_object
 from src.plotter.domain.plotio_preprocess_command_to_optization import PreprocessCommandsToOptimization
 from src.plotter.domain.plotio_tabu_search import PlotioTabuSearch, Point, calculate_value
 import math
@@ -82,6 +88,39 @@ class Project:
         if len(self.commands_to_do) == 0:
             self.complete_project()
         
+    def optimize_command_groups(self, method: OptimizationMethod, command_groups: List[CommandGroup]):        
+        initial_solution = [Point(point.position.posX, point.position.posY, point.position.isHit) for point in self.all_commands]
+        
+        optimized_commands = None
+        
+        if(method == OptimizationMethod.TabuSearch):
+            optimized_commands = self._optimize_with_tabu(initial_solution)
+        elif(method == OptimizationMethod.SimulatedAnnealing):
+            optimized_commands = self._optimize_with_simulated_annealing(initial_solution)
+        else:
+            optimized_commands = self.all_commands
+        
+        self.all_commands = optimized_commands
+        self.commands_to_do = optimized_commands
+        self.status = ProjectStatus.Ready
+        
+    def optimize_command_group_path(self, labels: ndarray, unique_labels: List[int], method: OptimizationMethod, command_groups: List[CommandGroup]):        
+        optimized_commands = None
+        
+        if(method == OptimizationMethod.TabuSearch):
+            optimized_commands = self._optimize_command_groups(labels, unique_labels, command_groups, OptimizationMethod.TabuSearch)
+        elif(method == OptimizationMethod.SimulatedAnnealing):
+            optimized_commands = self._optimize_command_groups(labels, unique_labels, command_groups, OptimizationMethod.SimulatedAnnealing)
+        else:
+            optimized_commands = self.all_commands
+        
+        optimal = calculate_value_of_commands(optimized_commands)
+        normal = calculate_value_of_commands(self.all_commands)
+        
+        self.all_commands = optimized_commands
+        self.commands_to_do = optimized_commands
+        self.status = ProjectStatus.Ready
+        
     def optimize_path(self, method: OptimizationMethod):        
         initial_solution = [Point(point.position.posX, point.position.posY, point.position.isHit) for point in self.all_commands]
         
@@ -98,17 +137,67 @@ class Project:
         self.commands_to_do = optimized_commands
         self.status = ProjectStatus.Ready
         
-    def _optimize_with_simulated_annealing(self, initial_solution: List[Point]):
-        optimizer = SimulatedAnnealing(initial_solution.copy(), Conditions(1000, 0.1, 0.1, 0.97, Annealing.linear))
-        optimizer.optimize()
+    def _optimize_command_groups(self, labels: ndarray, unique_labels: List[int], command_groups: List[CommandGroup], method: OptimizationMethod) -> List[Point]:
+        solution: List[Point] = []
+        current_position: PlotterPosition = PlotterPosition(0, 0, 0)
+        active_command_group = command_groups.copy()
         
-        sol_value = calculate_value(optimizer.best_solution)
-        init_value = calculate_value(initial_solution)
-        
-        optimized_commands = [Command(PlotterPosition(pos.posX, pos.posY, pos.hit)) for pos in optimizer.best_solution]
-        
+        while active_command_group != None and len(active_command_group) > 0:
+            next_position, command_group_id = get_nearest_object(current_position, active_command_group)    
+            proposed_solution = self.get_proposed_solution(labels, labels[next_position.posY, next_position.posX])            
+            
+            swap_points(proposed_solution, next_position, proposed_solution[0])
+            if len(proposed_solution) > 2 and len(proposed_solution) < 600:
+                tabu_optimizer = PlotioTabuSearch(proposed_solution.copy(), 30, maximum_neighbors=300, random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
+                optimized = tabu_optimizer.optimize(min(100, len(proposed_solution)), None)
+                solution = solution + optimized
+            else:
+                solution = solution + proposed_solution
+                
+            del active_command_group[command_group_id]
+             
+        optimized_commands = [Command(PlotterPosition(pos.posX, pos.posY, pos.hit)) for pos in solution]
         return optimized_commands
+
+    def get_proposed_solution(self, label_image: ndarray, label: int):
+        proposed_solution_xy, xy_value = self.get_proposed_solution_xy(label_image, label)
+        proposed_solution_yx, yx_value = self.get_proposed_solution_yx(label_image, label)
+                
+        if(xy_value < yx_value):
+            return proposed_solution_xy
+        return proposed_solution_yx
+
+    def get_proposed_solution_yx(self, label_image, label):
+        proposed_solution_yx: List[Point] = []
+                    
+        for y in range(0, label_image.shape[1]):
+            if(y % 2 == 0):
+                for x in range(0, label_image.shape[0]):
+                    if(label_image[x, y] == label):
+                        proposed_solution_yx.append(Point(y, x, 1))
+            else:
+                for x in range(label_image.shape[0] - 1, 0, -1):
+                    if(label_image[x, y] == label):
+                        proposed_solution_yx.append(Point(y, x, 1))
+                        
+        yx_value = calculate_value(proposed_solution_yx)
+        return proposed_solution_yx,yx_value
+
+    def get_proposed_solution_xy(self, label_image, label):
+        proposed_solution_xy: List[Point] = []
         
+        for x in range(0, label_image.shape[0]):
+            if x % 2 == 0:
+                for y in range(0, label_image.shape[1]):
+                    if(label_image[x, y] == label):
+                        proposed_solution_xy.append(Point(y, x, 1))
+            else:
+                for y in range(label_image.shape[1] - 1, 0, -1):
+                    if(label_image[x, y] == label):
+                        proposed_solution_xy.append(Point(y, x, 1))   
+                        
+        xy_value = calculate_value(proposed_solution_xy)
+        return proposed_solution_xy,xy_value
         
     def _optimize_with_tabu(self, initial_solution: List[Point]):
         preprocessed_commands = PreprocessCommandsToOptimization(initial_solution, 40, 40, self.image_shape[1], self.image_shape[0])

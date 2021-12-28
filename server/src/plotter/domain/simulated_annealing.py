@@ -35,12 +35,13 @@ def logarithmic_annealing(T: float, epoch: float):
 
 
 class SimulatedAnnealing:
-    def __init__(self, initial_solution: List[Point], conditions: Conditions) -> None:
-        self.solution: List[Point] = initial_solution
-        self.solution_score: int = calculate_value(initial_solution)
-        self.best_solution: List[Point] = initial_solution
+    def __init__(self, initial_solution: List[Point], conditions: Conditions, is_first_and_last_element_static: bool = True) -> None:
+        self.solution: List[Point] = initial_solution.copy()
+        self.solution_score: int = calculate_value(self.solution)
+        self.best_solution: List[Point] = initial_solution.copy()
         self.best_solution_score: int = self.solution_score
         self.solution_length = len(self.solution)
+        self.is_first_and_last_element_static: bool = is_first_and_last_element_static
         
         self.conditions: Conditions = conditions
         self.T = conditions.T0
@@ -50,16 +51,22 @@ class SimulatedAnnealing:
         newPermutationIter = 0
         while(self.T > self.conditions.T_end):
             for k in range(1, self.conditions.L):
-                i, j = np.random.randint(1, self.solution_length - 1, size=2)
+                if(self.is_first_and_last_element_static):                
+                    i, j = np.random.randint(1, self.solution_length - 1, size=2)
+                else:
+                    i, j = np.random.randint(0, self.solution_length, size=2)
+                    
+                curr_score = self.solution_score
                 self.solution = swap_indexes(self.solution, i, j)
                 self.solution_score = calculate_value(self.solution)
                 
                 if self.best_solution_score > self.solution_score:
                     self.best_solution_score = self.solution_score
-                    self.best_solution = self.solution
+                    self.best_solution = self.solution.copy()
                 else:
                     x = np.random.uniform()
-                    if x < np.exp((self.best_solution_score - self.solution_score) / self.T):
+                    diff_of_solutions = self.solution_score - curr_score
+                    if diff_of_solutions < 0 or x < np.exp((-diff_of_solutions) / self.T):
                         newPermutationIter = newPermutationIter + 1
                     else:
                         self.solution = swap_indexes(self.solution, i, j)

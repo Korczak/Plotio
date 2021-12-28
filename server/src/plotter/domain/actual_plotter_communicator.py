@@ -30,7 +30,7 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         return None
 
     def connect(self, connection_settings: ConnectionSettings) -> bool:
-        self.arduino = serial.Serial(port="COM6", baudrate=9600, timeout=.1)
+        self.arduino = serial.Serial(port=connection_settings.port, baudrate=connection_settings.baudrate, timeout=connection_settings.timeout)
         self.connected = True
         self.connection_settings: ConnectionSettings = connection_settings
         

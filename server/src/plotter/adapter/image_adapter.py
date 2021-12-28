@@ -1,9 +1,11 @@
+from enum import unique
 from typing import List
 import cv2
 import numpy as np
 from pubsub import pub
 from base64 import urlsafe_b64decode, b64decode, b64encode
 from src.plotter.domain.command import Command
+from src.plotter.domain.command_group import CommandGroup
 from src.plotter.domain.plotter_position import PlotterPosition
 from src.plotter.domain.project import Project, ProjectStatus
 from src.plotter.infrastructure.plotter_repository import PlotterRepository
@@ -28,20 +30,74 @@ class ImageAdapter:
         threshold = 128
         
         ret, thresh_img = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY)
-
-        commands: List[Command] = []
         
-        commands.append(Command(PlotterPosition(0, 0, 0)))
-
-        for y in range(0, img.shape[1]):
+        equivalency_list, labels = self.extract_sub_images(img, thresh_img)
+        
+        commandGroups: List[CommandGroup] = []
+        
+        unique_labels = set(equivalency_list.values())
+        
+        #commandGroups.append(CommandGroup([Command(PlotterPosition(0, 0, 0))]))
+        
+        for label in unique_labels:
+            commands: List[Command] = []
             for x in range(0, img.shape[0]):
-                if(thresh_img[x, y] == 0):
-                    commands.append(Command(PlotterPosition(y, x, 1)))
+                for y in range(0, img.shape[1]):
+                    if(labels[x, y] == label):
+                        commands.append(Command(PlotterPosition(y, x, 1)))
+            
+            commandGroups.append(CommandGroup(commands))
                     
-        commands.append(Command(PlotterPosition(0, 0, 0)))            
+        #commandGroups.append(CommandGroup([Command(PlotterPosition(0, 0, 0))]))     
+        all_commands: List[Command] = []
+        for commandGroup in commandGroups:
+            all_commands = all_commands + commandGroup.commands        
         
         plotter = self.plotter_repository.get_plotter()
-        plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, commands, commands, thresh_img, img.shape))
+        plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, all_commands, all_commands, thresh_img, img.shape))
         self.plotter_repository.update_plotter(plotter)
         
-        self.optimize_path_service.optimize_path(plotter)
+        self.optimize_path_service.optimize_command_group_path(labels, unique_labels, plotter, commandGroups)
+
+    def extract_sub_images(self, img, thresh_img):
+        labels = np.zeros((img.shape[0], img.shape[1]))
+        
+        object_color = 0
+        curr_obj = 0
+        equivalency_list = {}
+        pixel_above, pixel_left = 0, 0
+        
+        
+        for x in range(0, img.shape[0]):
+            for y in range(0, img.shape[1]):
+                if(thresh_img[x, y] == object_color):
+                    pixel_above, pixel_left = 0, 0
+                    
+                    if y > 0:
+                        if labels[x][y-1] > 0:
+                            pixel_above = equivalency_list[labels[x][y-1]]
+                    
+                    if x > 0:
+                        if labels[x-1][y] > 0:
+                            pixel_left = equivalency_list[labels[x-1][y]]
+                        
+                    if pixel_above != 0 and pixel_left != 0:
+                        classification = min(pixel_above, pixel_left)
+                        equivalency_list[pixel_left] = classification
+                        equivalency_list[pixel_above] = classification
+                    elif pixel_above != 0:
+                        classification = pixel_above
+                    elif pixel_left != 0:
+                        classification = pixel_left
+                    else:
+                        curr_obj += 1 
+                        equivalency_list[curr_obj] = curr_obj
+                        classification = curr_obj
+                      
+                    labels[x][y] = int(classification)
+
+        for x in range(0, img.shape[0]):
+            for y in range(0, img.shape[1]):
+                if(thresh_img[x][y] == object_color):
+                    labels[x][y] = equivalency_list[int(labels[x][y])]
+        return equivalency_list, labels

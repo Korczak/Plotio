@@ -1,5 +1,13 @@
 
 from typing import List
+from src.plotter.domain.command import Command
+
+from src.plotter.domain.plotter_position import PlotterPosition
+
+class OptimizerSettings:
+    def __init__(self, is_first_element_static: bool, is_last_element_static: bool) -> None:
+        self.is_last_element_static: bool = is_last_element_static
+        self.is_first_element_static : bool = is_first_element_static
 
 class Point:
     def __init__(self, posX: float, posY: float, hit: 0 | 1 = 1) -> None:
@@ -99,6 +107,21 @@ def calculate_value(solution: List[Point], show = False):
     for node in solution[1:]:
         value = value + get_distance(current_pos, node)
         current_pos = node
+    
+    
+    if(show):
+        solution_text = [str(sol) for sol in solution]
+        print(f'Value of solution {solution_text} is {value}')
+    
+    return value
+
+def calculate_value_of_commands(solution: List[Command], show = False):
+    value = 0
+    current_pos = solution[0].position
+    
+    for node in solution[1:]:
+        value = value + get_distance(current_pos, node.position)
+        current_pos = node.position
     
     
     if(show):

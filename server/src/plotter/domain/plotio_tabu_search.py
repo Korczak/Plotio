@@ -6,14 +6,14 @@ import numpy as np
 from src.plotter.domain.opimization_utils import *
 
 class PlotioTabuSearch:
-    def __init__(self, initial_solution: List[Point], tabu_tenure: int, maximum_neighbors: int = None, random_neighbors: bool = False, is_first_and_last_element_static: bool = True) -> None:
+    def __init__(self, initial_solution: List[Point], tabu_tenure: int, optimizer_settings: OptimizerSettings, maximum_neighbors: int = None, random_neighbors: bool = False) -> None:
         self.solution: List[Point] = initial_solution
         self.solution_score: int = calculate_value(initial_solution)
         self.best_solution: List[Point] = initial_solution
         self.best_score: int = calculate_value(initial_solution)
         self.tabu_tenure: int = tabu_tenure
         self.restricted_moves: List[Move] = []       
-        self.is_first_and_last_element_static = is_first_and_last_element_static
+        self.optimizer_settings: OptimizerSettings = optimizer_settings
         self.maximum_neighbors: int = maximum_neighbors
         self.random_neighbors: bool = random_neighbors
         self.moves_to_skip = 0
@@ -27,8 +27,9 @@ class PlotioTabuSearch:
         starting_index = 0
         ending_index = len(solution) 
         
-        if self.is_first_and_last_element_static:
+        if self.optimizer_settings.is_first_element_static:
             starting_index = 1
+        if self.optimizer_settings.is_last_element_static:
             ending_index = len(solution) - 1
         
         if(self.maximum_neighbors == None):    
