@@ -149,7 +149,7 @@ class Project:
             swap_points(proposed_solution, next_position, proposed_solution[0])
             if len(proposed_solution) > 2 and len(proposed_solution) < 600:
                 tabu_optimizer = PlotioTabuSearch(proposed_solution.copy(), 30, maximum_neighbors=300, random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
-                optimized = tabu_optimizer.optimize(min(100, len(proposed_solution)), None)
+                optimized = tabu_optimizer.optimize(min(50, len(proposed_solution)), None)
                 solution = solution + optimized
             else:
                 solution = solution + proposed_solution
