@@ -48,7 +48,7 @@ export default class Simulation extends Mixins(RetrieverLoop) {
     this.canvas = document.querySelector("#my-canvas") as any;
     this.context = this.canvas.getContext("2d");
     this.redrawCanvas();
-    this.retrieve_loop(this.getActualPosition);
+    this.retrieve_loop(this.getActualPosition, 50);
     this.context.scale(1, 1);
     let imageContent = await getProjectImagePlotterProjectCurrentImageGet();
     if (imageContent.data != null) {
