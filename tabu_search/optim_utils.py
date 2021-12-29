@@ -1,6 +1,11 @@
 
 from typing import List
 
+class OptimizerSettings:
+    def __init__(self, is_first_element_static: bool, is_last_element_static: bool) -> None:
+        self.is_last_element_static: bool = is_last_element_static
+        self.is_first_element_static : bool = is_first_element_static
+
 class Point:
     def __init__(self, posX: float, posY: float, hit: 0 | 1 = 1) -> None:
         self.posX: float = posX
