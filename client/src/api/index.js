@@ -8,6 +8,10 @@ export function getProjectImagePlotterProjectCurrentImageGet() {
   return request("get", `/plotter/project/current/image`, { "header": { "Content-Type": "application/json", }, })();
 }
 
+export function getProjectImagePlotterProjectCurrentProcessedImageGet() {
+  return request("get", `/plotter/project/current/processed-image`, { "header": { "Content-Type": "application/json", }, })();
+}
+
 export function startProjectPlotterProjectStartPost() {
   return request("post", `/plotter/project/start`, { "header": { "Content-Type": "application/json", }, })();
 }
@@ -78,6 +82,18 @@ export function getPlotterSettingsPlotterPlotterSettingsGet() {
 
 export function setPlotterSettingsPlotterPlotterSettingsPost(params) {
   return request("post", `/plotter/plotter/settings`, { "header": { "accept": "application/json", "Content-Type": "application/json", }, })(params);
+}
+
+export function getAlarmPlotterPlotterAlarmGet() {
+  return request("get", `/plotter/plotter/alarm`, { "header": { "Content-Type": "application/json", }, })();
+}
+
+export function resetAlarmPlotterPlotterAlarmResetPost() {
+  return request("post", `/plotter/plotter/alarm/reset`, { "header": { "Content-Type": "application/json", }, })();
+}
+
+export function ignoreAlarmPlotterPlotterAlarmIgnorePost() {
+  return request("post", `/plotter/plotter/alarm/ignore`, { "header": { "Content-Type": "application/json", }, })();
 }
 
 export function addImageImageAddImagePost(params) {

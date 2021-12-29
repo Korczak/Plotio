@@ -25,14 +25,16 @@
           </div>
         </div>
       </v-btn>
+      <automatic-mode-block-card></automatic-mode-block-card>
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import AutomaticModeBlockCard from "../molecules/automatic_mode_block_card.vue";
 
-@Component({ components: {} })
+@Component({ components: { AutomaticModeBlockCard } })
 export default class PlotterMenu extends Vue {
   emitEvent(event: string) {
     this.$emit(event);

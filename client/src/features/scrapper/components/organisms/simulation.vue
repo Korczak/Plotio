@@ -9,7 +9,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import CanvasDrawer from "../atoms/canvas-drawer";
 import {
   getPositionPlotterPositionGet,
-  getProjectImagePlotterProjectCurrentImageGet,
+  getProjectImagePlotterProjectCurrentProcessedImageGet,
 } from "@/api/index";
 import Position from "../atoms/position";
 import RetrieverLoop from "../atoms/retriever-loop";
@@ -26,16 +26,11 @@ export default class Simulation extends Mixins(RetrieverLoop) {
 
   async getActualPosition() {
     let plotterPosition = await getPositionPlotterPositionGet();
-    let redrawImage: boolean = false;
-    if (
-      this.plotterPosition.x != plotterPosition.data.positionX ||
-      this.plotterPosition.y != plotterPosition.data.positionY
-    )
-      redrawImage = true;
+
     this.plotterPosition.x = plotterPosition.data.positionX;
     this.plotterPosition.y = plotterPosition.data.positionY;
 
-    if (redrawImage) this.redrawCanvas();
+    this.redrawCanvas();
   }
 
   context: any = null;
@@ -50,11 +45,16 @@ export default class Simulation extends Mixins(RetrieverLoop) {
     this.redrawCanvas();
     this.retrieve_loop(this.getActualPosition, 50);
     this.context.scale(1, 1);
-    let imageContent = await getProjectImagePlotterProjectCurrentImageGet();
+    setInterval(() => this.updateImage(), 500);
+    this.redrawCanvas();
+  }
+
+  private async updateImage() {
+    let imageContent =
+      await getProjectImagePlotterProjectCurrentProcessedImageGet();
     if (imageContent.data != null) {
       this.originalImage.src = "data:image/png;base64," + imageContent.data;
       this.isImageLoaded = true;
-      this.redrawCanvas();
     }
   }
 
@@ -62,9 +62,9 @@ export default class Simulation extends Mixins(RetrieverLoop) {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.context.translate(this.translate.x, this.translate.y);
-    if (this.isImageLoaded) {
-      this.context.drawImage(this.originalImage, 0, 0);
-    }
+
+    this.context.drawImage(this.originalImage, 0, 0);
+    console.log("Draw image");
     CanvasDrawer.drawSquarePoint(
       this.context!,
       this.plotterPosition.x,

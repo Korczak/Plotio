@@ -40,6 +40,7 @@
         </v-col>
       </v-row>
     </v-container>
+    <alarm-dialog></alarm-dialog>
   </div>
 </template>
 
@@ -53,6 +54,7 @@ import ManualSteering from "../components/organisms/manual_steering.vue";
 import Simulation from "../components/organisms/simulation.vue";
 import ImportImage from "../components/organisms/import_image.vue";
 import StatusBar from "../components/organisms/status_bar.vue";
+import AlarmDialog from "../components/molecules/alarm_dialog.vue";
 //import { rootGet } from "@/api/index";
 
 @Component({
@@ -65,6 +67,7 @@ import StatusBar from "../components/organisms/status_bar.vue";
     Simulation,
     ImportImage,
     StatusBar,
+    AlarmDialog,
   },
 })
 export default class Plotter extends Vue {

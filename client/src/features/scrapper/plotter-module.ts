@@ -3,7 +3,6 @@ import { VueModule } from "vue-modules";
 import VueRouter from "vue-router";
 import { RouteConfig } from "vue-router";
 import { Store } from "vuex";
-import { plotterStore } from "./store/store";
 import Vue from "vue";
 
 import Plotter from "./pages/Plotter.vue";
@@ -13,6 +12,7 @@ import IconTextBtn from "./components/atoms/icon-text-btn.vue";
 import Bar from "./components/atoms/bar.vue";
 import LoadingInProgress from "./components/atoms/loading-in-progress.vue";
 import ErrorSnackbar from "./components/atoms/error-snackbar.vue";
+import { PlotterStore } from "./store/plotter-store";
 
 Vue.component("icon-text-btn", IconTextBtn);
 Vue.component("bar", Bar);
@@ -21,14 +21,9 @@ Vue.component("error-snackbar", ErrorSnackbar);
 
 const plotterRoutes: RouteConfig[] = [
   {
-    path: "/plotter",
-    name: "plotter",
-    component: Plotter,
-  },
-  {
     path: "/",
     name: "home",
-    component: HelloWorld,
+    component: Plotter,
   },
 ];
 
@@ -42,7 +37,6 @@ export class PlotterModule implements VueModule {
 
   install(Vue: typeof _Vue) {
     this.router.addRoutes(plotterRoutes);
-    this.provide.addProvider({});
-    this.store.registerModule([this.name], plotterStore);
+    this.provide.addProvider({ plotterStore: new PlotterStore() });
   }
 }

@@ -12,6 +12,12 @@ type GetProjectImagePlotterProjectCurrentImageGetResult0 = RequestResult<string>
 */
 export function getProjectImagePlotterProjectCurrentImageGet(): GetProjectImagePlotterProjectCurrentImageGetResult0;
 
+type GetProjectImagePlotterProjectCurrentProcessedImageGetResult0 = RequestResult<string>;
+/**
+* Get Project Image
+*/
+export function getProjectImagePlotterProjectCurrentProcessedImageGet(): GetProjectImagePlotterProjectCurrentProcessedImageGetResult0;
+
 type StartProjectPlotterProjectStartPostResult0 = RequestResult<object>;
 /**
 * Start Project
@@ -124,6 +130,24 @@ type SetPlotterSettingsPlotterPlotterSettingsPostResult0 = RequestResult<{ "is_s
 * Set Plotter Settings
 */
 export function setPlotterSettingsPlotterPlotterSettingsPost(params: SetPlotterSettingsPlotterPlotterSettingsPostParams0): SetPlotterSettingsPlotterPlotterSettingsPostResult0;
+
+type GetAlarmPlotterPlotterAlarmGetResult0 = RequestResult<{ "is_alarm": boolean; "message": string; }>;
+/**
+* Get Alarm
+*/
+export function getAlarmPlotterPlotterAlarmGet(): GetAlarmPlotterPlotterAlarmGetResult0;
+
+type ResetAlarmPlotterPlotterAlarmResetPostResult0 = RequestResult<object>;
+/**
+* Reset Alarm
+*/
+export function resetAlarmPlotterPlotterAlarmResetPost(): ResetAlarmPlotterPlotterAlarmResetPostResult0;
+
+type IgnoreAlarmPlotterPlotterAlarmIgnorePostResult0 = RequestResult<object>;
+/**
+* Ignore Alarm
+*/
+export function ignoreAlarmPlotterPlotterAlarmIgnorePost(): IgnoreAlarmPlotterPlotterAlarmIgnorePostResult0;
 
 type AddImageImageAddImagePostParams0 = { "body"?: { "name": string; "content": string; }; };
 type AddImageImageAddImagePostResult0 = RequestResult<object>;
