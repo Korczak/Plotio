@@ -129,13 +129,13 @@ def calculate_value(solution: List[Point], show = False):
 
 def calculate_value_of_point_with_commands(solution: List[PointWithCommands], show = False):
     value = 0
-    current_pos = solution[0].commands[0].position
+    current_pos = solution[0].commands[0].command_detail
     
     for command_group in solution:
         for command in command_group.commands:
-            value = value + get_distance(current_pos, command.position)
+            value = value + get_distance(current_pos, command.command_detail)
             
-            current_pos = command.position
+            current_pos = command.command_detail
     
     
     if(show):
@@ -146,11 +146,11 @@ def calculate_value_of_point_with_commands(solution: List[PointWithCommands], sh
 
 def calculate_value_of_commands(solution: List[Command], show = False):
     value = 0
-    current_pos = solution[0].position
+    current_pos = solution[0].command_detail
     
     for node in solution[1:]:
-        value = value + get_distance(current_pos, node.position)
-        current_pos = node.position
+        value = value + get_distance(current_pos, node.command_detail)
+        current_pos = node.command_detail
     
     
     if(show):

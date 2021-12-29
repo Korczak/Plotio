@@ -24,8 +24,19 @@ class RenderSimulationService:
     def get_all_commands(self) -> List[PlotterPosition]:
         project = self.project_repository.get_active_project()
         
-        return [PlotterPosition(positionX = command.position.posX, positionY = command.position.posY) for command in project.all_commands]
+        return [PlotterPosition(positionX = command.command_detail.posX, positionY = command.command_detail.posY) for command in project.all_commands]
 
+    def get_image_with_processed_commands(self) -> str:
+        project = self.project_repository.get_active_project()
+        if(project is None):
+            return None
+
+        _, im_arr = cv2.imencode('.jpg', project.image_with_processed_commands)  # im_arr: image in Numpy one-dim array format.
+        im_bytes = im_arr.tobytes()
+        im_b64 = base64.b64encode(im_bytes)
+
+
+        return im_b64
 
     def get_original_image(self) -> str:
         project = self.project_repository.get_active_project()

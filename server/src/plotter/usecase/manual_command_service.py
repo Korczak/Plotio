@@ -41,22 +41,22 @@ class ManualCommandService:
 
         move_amount = 5
         if(input.command == "Up"):
-            command = Command(position=PlotterPosition(current_position.posX, current_position.posY + move_amount, 0))
+            command = Command(PlotterPosition(current_position.posX, current_position.posY + move_amount, 0))
         elif(input.command == "Down"):
-            command = Command(position=PlotterPosition(current_position.posX, current_position.posY - move_amount, 0))
+            command = Command(PlotterPosition(current_position.posX, current_position.posY - move_amount, 0))
         elif(input.command == "Left"):
-            command = Command(position=PlotterPosition(current_position.posX - move_amount, current_position.posY, 0))
+            command = Command(PlotterPosition(current_position.posX - move_amount, current_position.posY, 0))
         elif(input.command == "Right"):
-            command = Command(position=PlotterPosition(current_position.posX + move_amount, current_position.posY, 0))
+            command = Command(PlotterPosition(current_position.posX + move_amount, current_position.posY, 0))
         elif(input.command == "Hit"):
-            command = Command(position=PlotterPosition(current_position.posX, current_position.posY, 1))
+            command = Command(PlotterPosition(current_position.posX, current_position.posY, 1))
         else:
             return ManualCommandResponse(False)
 
         if(plotter.is_work_mode()):
-            self.actual_plotter.send_command(command.position)
+            self.actual_plotter.send_command(command.command_detail)
         else:
-            self.simulation_plotter.send_command(command.position)
+            self.simulation_plotter.send_command(command.command_detail)
         return ManualCommandResponse(isSuccess=True, message="Command sent")
     
     async def move_to(self, input: PositionCommandInput) -> None:
@@ -70,9 +70,9 @@ class ManualCommandService:
             command = Command(position=PlotterPosition(current_position.posX, input.position, 0))
             
         if(plotter.is_work_mode()):
-            self.actual_plotter.send_command(command.position)
+            self.actual_plotter.send_command(command.command_detail)
         else:
-            self.simulation_plotter.send_command(command.position)
+            self.simulation_plotter.send_command(command.command_detail)
         return ManualCommandResponse(isSuccess=True, message="Command sent")
     
     async def positioning(self) -> ManualCommandResponse:

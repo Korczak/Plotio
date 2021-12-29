@@ -1,4 +1,5 @@
-from typing import List, Optional
+from typing import Any, List, Optional
+from src.plotter.domain.command_details import CommandDetails
 from src.plotter.domain.plotter_communicator_interface import *
 
 from src.plotter.domain.plotter_position import PlotterPosition
@@ -49,12 +50,16 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         myports = [p.device for p in list(serial.tools.list_ports.comports())]
         return myports
     
-    def send_command(self, position: PlotterPosition):
-        text = f"KOMENDA,{position.posX},{position.posY},{position.isHit}".encode()
-        print(text)
-        self.arduino.write(text)
-        self.arduino.flush()
-        
+    def send_command(self, command_detail: Any):
+        if isinstance(command_detail, CommandDetails):
+            text = f"{command_detail.text}".encode()
+            print(text)
+            self.arduino.write(text)
+        elif isinstance(command_detail, PlotterPosition):
+            text = f"KOMENDA,{command_detail.posX},{command_detail.posY},{command_detail.isHit}".encode()
+            print(text)
+            self.arduino.write(text)
+           
     def send_settings(self, settings: PlotterSettings):
         command = f"USTAWIENIA,{settings.speed_of_motors},{settings.speed_of_Z}".encode()
         self.arduino.write(command)

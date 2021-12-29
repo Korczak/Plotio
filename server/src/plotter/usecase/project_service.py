@@ -22,19 +22,16 @@ class ProjectService:
         plotter = self.plotter_repository.get_plotter()
         plotter.start_project()
         self.plotter_repository.update_plotter(plotter)
-        self.alert_repository.add_alert(Alert("Uruchomiono projekt", AlertType.Success))
         
     def stop_project(self):
         plotter = self.plotter_repository.get_plotter()
         plotter.stop_project()
         self.plotter_repository.update_plotter(plotter)
-        self.alert_repository.add_alert(Alert("Przerwano projekt", AlertType.Error))
 
     def pause_project(self):
         plotter = self.plotter_repository.get_plotter()
         plotter.pause_project()
         self.plotter_repository.update_plotter(plotter)
-        self.alert_repository.add_alert(Alert("Zatrzymano projekt", AlertType.Warning))
 
 
 

@@ -15,16 +15,16 @@ def get_nearest_object(current_position: PlotterPosition, command_groups: List[C
     
     for command_id, command_group in enumerate(command_groups):
         commands = command_group.commands
-        if len(command_group.commands) > 50:
-            commands = command_group.commands[:50]
-        possible_position = [get_distance(Point(command.position.posX, command.position.posY, command.position.isHit), Point(current_position.posX, current_position.posY, current_position.isHit)) for command in commands]
+        if len(command_group.commands) > 200:
+            commands = command_group.commands[:200]
+        possible_position = [get_distance(Point(command.command_detail.posX, command.command_detail.posY, command.command_detail.isHit), Point(current_position.posX, current_position.posY, current_position.isHit)) for command in commands]
         
         possible_position_min_id = np.argmin(possible_position)
         
         if min_distance > possible_position[possible_position_min_id]:
             min_distance = possible_position[possible_position_min_id]
             command_group_id = command_id
-            next_position = command_group.commands[possible_position_min_id].position
+            next_position = command_group.commands[possible_position_min_id].command_detail
             
     return next_position, command_group_id
 

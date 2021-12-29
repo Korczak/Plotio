@@ -1,6 +1,8 @@
 import enum
-from typing import List, Optional
+from typing import Generic, List, Optional, TypeVar
 from src.plotter.domain.plotter_position import PlotterPosition
+T = TypeVar("T")
+
 
 class CommandStatus(enum.Enum):
     Pending = 'Pending'
@@ -8,9 +10,9 @@ class CommandStatus(enum.Enum):
     Completed = 'Completed'
     Aborted = 'Aborted'
 
-class Command:
-    def __init__(self, position: PlotterPosition) -> None:
-        self.position: PlotterPosition = position
+class Command(Generic[T]):
+    def __init__(self, command_detail: T) -> None:
+        self.command_detail: T = command_detail
         self.status: CommandStatus = CommandStatus.Pending
 
     def can_send_command(self):

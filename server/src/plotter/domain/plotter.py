@@ -1,7 +1,11 @@
 import enum
 from typing import List, Optional
+
+from pubsub import pub
 from src import plotter
+from src.plotter.domain.alarm import Alarm, AlarmType
 from src.plotter.domain.command import Command
+from src.plotter.domain.command_details import CommandDetails
 
 from src.plotter.domain.plotter_position import PlotterPosition
 from src.plotter.domain.project import Project
@@ -25,13 +29,17 @@ class Plotter:
         self.plotter_mode = PlotterMode.Simulation
         self.work_mode = WorkMode.Manual
         self.project: Optional[Project] = None
+        self.alarm: Alarm = None
+        self.urgent_command: Command = None
 
-    def __init__(self, status: PlotterStatus, position: PlotterPosition, plotter_mode: PlotterMode, work_mode: WorkMode, project: Project) -> None:
+    def __init__(self, status: PlotterStatus, position: PlotterPosition, plotter_mode: PlotterMode, work_mode: WorkMode, project: Project, alarm: Alarm, urgent_command: Command) -> None:
         self.status: PlotterStatus = status
         self.position: PlotterPosition = position
         self.plotter_mode = plotter_mode
         self.work_mode = work_mode
         self.project: Project = project
+        self.alarm: Alarm = alarm
+        self.urgent_command: Command = urgent_command
 
     def moveTo(self, position: PlotterPosition):
         self.position = position
@@ -65,6 +73,8 @@ class Plotter:
         if(self.project is not None):
             self.project.complete_project()
             self.work_mode = WorkMode.Manual
+            
+            
 
     def add_project(self, project: Project):
         if(self.project is not None):
@@ -93,6 +103,8 @@ class Plotter:
         return self.project.get_current_command()
     
     def get_next_command(self) -> Command:
+        if(self.urgent_command != None):
+            return self.urgent_command
         if(self.work_mode != WorkMode.Automatic):
             return None
         if(self.project is None):
@@ -104,14 +116,29 @@ class Plotter:
         
     def send_current_command(self):
         if(self.project is None):
-            raise Exception("Project is null")
+            return None
         
         self.project.send_current_command()
         
     def complete_current_command(self):
         if(self.project is None):
-            raise Exception("Project is null")
+            return None
         
         self.project.complete_current_command()
         
+    def is_alarm_active(self):
+        if self.alarm != None and self.alarm.enabled == True:
+            return True
+        return False    
+    
+    def set_alarm(self, alarm: Alarm):
+        self.alarm = alarm
+        self.pause_project()
         
+    def reset_alarm(self):
+        self.alarm.disable_alarm()
+        self.urgent_command = Command(CommandDetails("RESET"))
+        
+    def ignore_alarm(self):
+        self.alarm.ignore_alarm(10)
+        self.work_mode = WorkMode.Manual

@@ -35,6 +35,8 @@ app.add_middleware(
 container = Container()
 container.plotter.plotter_position_service().subscribe()
 container.plotter.image_adapter().subscribe()
+container.plotter.alarm_service().subscribe()
+container.plotter.alert_service().subscribe()
 
 container.wire(modules=[__name__, image_controller, plotter_controller])
 app.container = container

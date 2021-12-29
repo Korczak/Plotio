@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import List
+from pubsub import pub
 from pydantic.main import BaseModel
-from src.plotter.domain.alert import AlertType
+from src.plotter.domain.alert import Alert, AlertType
 from src.plotter.infrastructure.alert_repository import AlertRepository
 
 
@@ -27,6 +28,25 @@ class AlertService:
         alerts_to_return.reverse()
         return AlertResponse(alerts=alerts_to_return)
     
+    def subscribe(self):
+        pub.subscribe(self.project_completed, 'ProjectCompleted')
+        pub.subscribe(self.project_paused, 'ProjectPaused')
+        pub.subscribe(self.project_stopped, 'ProjectStopped')
+        pub.subscribe(self.project_started, 'ProjectStarted')
+        pub.subscribe(self.project_resumed, 'ProjectResumed')
+
+    def project_completed(self):
+        self.alert_repository.add_alert(Alert("Ukończono projekt", AlertType.Success))
+    def project_paused(self):
+        self.alert_repository.add_alert(Alert("Spauzowano projekt", AlertType.Warning))
+    def project_stopped(self):
+        self.alert_repository.add_alert(Alert("Zastopowano projekt", AlertType.Warning))
+    def project_started(self):
+        self.alert_repository.add_alert(Alert("Rozpoczęto projekt", AlertType.Success))
+    def project_resumed(self):
+        self.alert_repository.add_alert(Alert("Wznowiono projekt", AlertType.Success))
+        
+        
 def convert_to_enum(type: AlertType) -> AlertModelEnum:
     switch={
         AlertType.Success: AlertModelEnum.Success,

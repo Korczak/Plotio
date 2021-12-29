@@ -36,7 +36,7 @@ class ImageAdapter:
         
         commandGroups: List[CommandGroup] = []
         
-        unique_labels = set(equivalency_list.values())
+        unique_labels = list(set(equivalency_list.values()))
         
         #commandGroups.append(CommandGroup([Command(PlotterPosition(0, 0, 0))]))
         
@@ -53,20 +53,18 @@ class ImageAdapter:
                             all_commands.append(Command(PlotterPosition(y, x, 1)))
             
             plotter = self.plotter_repository.get_plotter()
-            plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, all_commands, all_commands, thresh_img, img.shape))
+            plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, all_commands, all_commands, thresh_img, thresh_img, img.shape))
             self.plotter_repository.update_plotter(plotter)
             
             self.optimize_path_service.optimize_command_group_path(labels, unique_labels, plotter, commandGroups)
             
         else:
             for label in unique_labels:
-                commands: List[Command] = []
-                for x in range(0, img.shape[0]):
-                    for y in range(0, img.shape[1]):
-                        if(labels[x, y] == label):
-                            commands.append(Command(PlotterPosition(y, x, 1)))
-                
-                commandGroups.append(CommandGroup(commands))
+                commandGroups.append(CommandGroup([]))
+            for x in range(0, img.shape[0]):
+                for y in range(0, img.shape[1]):
+                    if(labels[x, y] != 0):
+                        commandGroups[unique_labels.index(labels[x, y])].commands.append(Command(PlotterPosition(y, x, 1)))
                         
             #commandGroups.append(CommandGroup([Command(PlotterPosition(0, 0, 0))]))     
             all_commands: List[Command] = []
@@ -74,7 +72,7 @@ class ImageAdapter:
                 all_commands = all_commands + commandGroup.commands        
             
             plotter = self.plotter_repository.get_plotter()
-            plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, all_commands, all_commands, thresh_img, img.shape))
+            plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, all_commands, all_commands, thresh_img, thresh_img, img.shape))
             self.plotter_repository.update_plotter(plotter)
             
             self.optimize_path_service.optimize_command_group_path(labels, unique_labels, plotter, commandGroups, OptimizationMethod.TabuSearch)

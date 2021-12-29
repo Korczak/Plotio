@@ -5,6 +5,7 @@ from dependency_injector.wiring import  inject
 
 from config.shared import dependency
 from src.plotter.domain.plotter_settings import PlotterSettings
+from src.plotter.usecase.alarm_service import AlarmResponse, AlarmService
 from src.plotter.usecase.alert_service import AlertResponse, AlertService
 from src.plotter.usecase.connect_service import ConnectService, ConnectionSettingsInput, ConnectionSettingsResponse
 from src.plotter.usecase.manual_command_service import ManualCommandInput, ManualCommandResponse, ManualCommandService, PositionCommandInput
@@ -35,6 +36,12 @@ async def get_all_commands(service: RenderSimulationService = dependency(Contain
 @inject
 async def get_project_image(service: RenderSimulationService = dependency(Container.plotter.render_simulation_service)):
     image_content = service.get_original_image()
+    return image_content
+
+@router.get("/project/current/processed-image", response_model=str)
+@inject
+async def get_project_image(service: RenderSimulationService = dependency(Container.plotter.render_simulation_service)):
+    image_content = service.get_image_with_processed_commands()
     return image_content
 
 @router.post("/project/start")
@@ -129,6 +136,22 @@ async def get_plotter_settings(service: PlotterSettingsService = dependency(Cont
 @inject
 async def set_plotter_settings(input: PlotterSettingsInput, service: PlotterSettingsService = dependency(Container.plotter.plotter_settings_service)):
     return await service.set_settings(input)
+
+@router.get("/plotter/alarm", response_model=AlarmResponse)
+@inject
+async def get_alarm(service: AlarmService = dependency(Container.plotter.alarm_service)):
+    return await service.get_alarm()
+
+@router.post("/plotter/alarm/reset")
+@inject
+async def reset_alarm(service: AlarmService = dependency(Container.plotter.alarm_service)):
+    await service.reset_alarm()
+
+@router.post("/plotter/alarm/ignore")
+@inject
+async def ignore_alarm(service: AlarmService = dependency(Container.plotter.alarm_service)):
+    await service.ignore_alarm()
+
 
 # @socketio.event
 # def my_event(message):

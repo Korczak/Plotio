@@ -2,9 +2,11 @@ from pymitter import EventEmitter
 from src.plotter.adapter.image_adapter import ImageAdapter
 from src.plotter.domain.actual_plotter_communicator import ActualPlotterCommunicator
 from src.plotter.domain.simulation_plotter_communicator import SimulationPlotterCommunicator
+from src.plotter.infrastructure.alarm_repository import AlarmRepository
 from src.plotter.infrastructure.alert_repository import AlertRepository
 from src.plotter.infrastructure.plotter_settings_repository import PlotterSettingsRepository
 from src.plotter.infrastructure.project_repository import ProjectRepository
+from src.plotter.usecase.alarm_service import AlarmService
 from src.plotter.usecase.alert_service import AlertService
 from src.plotter.usecase.automatic_command_service import AutomaticCommandService
 from src.plotter.usecase.connect_service import ConnectService
@@ -35,9 +37,10 @@ class PlotterModule(containers.DeclarativeContainer):
     #     services.SearchService,
     #     giphy_client=giphy_client,
     # )
-
+    
+    alarm_repository=providers.Singleton(AlarmRepository)
     project_repository=providers.Singleton(ProjectRepository)
-    plotter_repository=providers.Singleton(PlotterRepository, project_repository=project_repository)
+    plotter_repository=providers.Singleton(PlotterRepository, project_repository=project_repository, alarm_repository=alarm_repository)
     alert_repository = providers.Singleton(AlertRepository)
     plotter_settings_repository = providers.Singleton(PlotterSettingsRepository)
     actual_plotter = providers.Singleton(ActualPlotterCommunicator)
@@ -50,7 +53,8 @@ class PlotterModule(containers.DeclarativeContainer):
     optimize_service = providers.Singleton(OptimizePathService, plotter_repository=plotter_repository)
     alert_service = providers.Singleton(AlertService, alert_repository=alert_repository)    
     progress_info_service = providers.Singleton(ProgressInfoService, plotter_repository=plotter_repository)
-    
+    alarm_service = providers.Singleton(AlarmService, alarm_repository=alarm_repository, plotter_repository = plotter_repository)
+
     
     automatic_command_service = providers.Singleton(AutomaticCommandService, 
                                                     plotter_repository=plotter_repository, 

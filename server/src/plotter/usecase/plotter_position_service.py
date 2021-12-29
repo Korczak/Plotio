@@ -1,4 +1,5 @@
 from src.plotter.domain.alert import Alert, AlertType
+from src.plotter.domain.plotter_communicator_interface import PlotterResponse
 from src.plotter.domain.plotter_position import PlotterPosition
 from src.plotter.infrastructure.alert_repository import AlertRepository
 from src.plotter.infrastructure.plotter_dto import PlotterDto
@@ -27,14 +28,18 @@ class PlotterPositionService:
         pub.subscribe(self.on_update_position, 'PositionUpdated')
         pub.subscribe(self.on_command_done, 'CommandDone')
 
-    def on_update_position(self, arg1: PlotterPosition):
-        plotter = self.plotter_repository.get_plotter()
-        plotter.moveTo(arg1)
+    def on_update_position(self, arg1: PlotterResponse):
+        plotter: Plotter = self.plotter_repository.get_plotter()
+        plotter.moveTo(arg1.position)
+        if arg1.alarmStatus == False and plotter.is_alarm_active():
+            plotter.alarm.disable_alarm()
         self.plotter_repository.update_plotter(plotter)
         
-    def on_command_done(self, arg1: PlotterPosition):
+    def on_command_done(self, arg1: PlotterResponse):
         plotter = self.plotter_repository.get_plotter()
-        plotter.moveTo(arg1)
+        plotter.moveTo(arg1.position)
+        if arg1.alarmStatus == False and plotter.is_alarm_active():
+            plotter.alarm.disable_alarm()
         plotter.complete_current_command()
         
         command = plotter.get_next_command()
@@ -44,9 +49,9 @@ class PlotterPositionService:
                 plotter.send_current_command()
                 
                 if(plotter.is_work_mode()):
-                    self.actual_plotter.send_command(command.position)
+                    self.actual_plotter.send_command(command.command_detail)
                 else:
-                    self.simulation_plotter.send_command(command.position) 
+                    self.simulation_plotter.send_command(command.command_detail) 
 
         if(plotter.project.is_completed_project()):
             self.alert_repository.add_alert(Alert("Ukończono projekt", AlertType.Success))

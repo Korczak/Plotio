@@ -5,6 +5,7 @@ from numpy import ndarray
 from numpy.core.fromnumeric import argmin
 from numpy.lib.function_base import delete
 from numpy.random.mtrand import f
+from pubsub import pub
 from src.plotter.domain.command import Command
 from src.plotter.domain.command_group import CommandGroup
 from src.plotter.domain.opimization_utils import *
@@ -39,15 +40,16 @@ class Project:
         self.all_commands: List[Command] = commands.copy()
         self.commands_to_do: List[Command] = []
         self.is_active = True
-        self.image_content = None
+        self.image_content: ndarray = None
 
-    def __init__(self, name: str, is_active: bool, status: ProjectStatus, all_commands: List[Command], commands_to_do: List[Command], image_content: str, image_shape: List[int]) -> None:
+    def __init__(self, name: str, is_active: bool, status: ProjectStatus, all_commands: List[Command], commands_to_do: List[Command], image_content: ndarray, image_with_processed_commands: ndarray, image_shape: List[int]) -> None:
         self.name = name
         self.is_active: bool = is_active
         self.status: ProjectStatus = status
         self.all_commands: List[Command] = all_commands.copy()
         self.commands_to_do: List[Command] = commands_to_do.copy()
-        self.image_content: str = image_content
+        self.image_content: ndarray = image_content.copy()
+        self.image_with_processed_commands: ndarray = image_with_processed_commands.copy()
         self.image_shape: List[int] = image_shape
 
     def load_image(self, image_content: str):
@@ -59,19 +61,26 @@ class Project:
     def complete_project(self):
         self.is_active = False
         self.status = ProjectStatus.Completed
+        pub.sendMessage('ProjectCompleted')
         
     def stop_project(self):
         self.is_active = False
         self.status = ProjectStatus.Stopped
+        pub.sendMessage('ProjectStopped')
         
     def start_project(self) -> bool:
         if(len(self.commands_to_do) != 0 and (self.status == ProjectStatus.Ready or self.status == ProjectStatus.Paused)):
+            if self.status == ProjectStatus.Ready:
+                pub.sendMessage('ProjectStarted')
+            else:
+                pub.sendMessage('ProjectResumed')
             self.status = ProjectStatus.Running
             return True
         return False
 
     def pause_project(self):
         self.status = ProjectStatus.Paused
+        pub.sendMessage('ProjectPaused')
 
     def get_current_command(self) -> Command:
         if self.commands_to_do[0].is_running_command():
@@ -85,6 +94,7 @@ class Project:
         self.commands_to_do[0].send_command()
 
     def complete_current_command(self) -> None:
+        self.image_with_processed_commands[self.commands_to_do[0].command_detail.posY, self.commands_to_do[0].command_detail.posX] = 125
         self.commands_to_do[0].complete_command()
         self.commands_to_do.pop(0)
         if len(self.commands_to_do) == 0:
@@ -144,34 +154,21 @@ class Project:
         
     def _optimize_command_groups(self, labels: ndarray, unique_labels: List[int], command_groups: List[CommandGroup], method: OptimizationMethod) -> List[Point]:
         grouped_solution: List[GroupOfPoints] = []
-        current_position: PlotterPosition = PlotterPosition(0, 0, 0)
+        next_position: PlotterPosition = PlotterPosition(0, 0, 0)
         active_command_group = command_groups.copy()
         
         while active_command_group != None and len(active_command_group) > 0:
-            next_position, command_group_id = get_nearest_object(current_position, active_command_group)    
-            proposed_solution = self.get_proposed_solution(labels, labels[next_position.posY, next_position.posX])    
-            # #for command_group in proposed_solution:
-            # #    print(f"Point({command_group.posX}, {command_group.posY})")
-            # #swap_points(proposed_solution, next_position, proposed_solution[0])
-            # if len(proposed_solution) > 2 and len(proposed_solution) < 600:
-            #     optimizer = PlotioTabuSearch(proposed_solution.copy(), int(math.sqrt(len(proposed_solution))), calculate_value_function=calculate_value, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=min(50, len(proposed_solution)), random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
-            #     #optimizer = SimulatedAnnealing(proposed_solution.copy(), Conditions(100, 0.1, 0.2, 0.97, 100, Annealing.linear), calculate_value_function=calculate_value, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=400, random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
-            #     optimizer.optimize(min(len(proposed_solution) * 5, 50*1000), None)
-            #     optimized = optimizer.best_solution
-            #     solution = solution + optimized
-            #     print(f"Normal: {calculate_value(proposed_solution)}, Optimized: {calculate_value(optimized)}")
-            # else:
-            
+            next_position, command_group_id = get_nearest_object(next_position, active_command_group)    
+            proposed_solution = self.get_proposed_solution(labels, labels[next_position.posY, next_position.posX])
             
             avgPosX = sum([com.posX for com in proposed_solution]) / len(proposed_solution)
             avgPosY = sum([com.posY for com in proposed_solution]) / len(proposed_solution)
             grouped_solution.append(GroupOfPoints(avgPosX, avgPosY, proposed_solution))
             del active_command_group[command_group_id]
             
-            
-        
+
         optimizer = PlotioTabuSearch(grouped_solution, int(math.sqrt(len(grouped_solution))), calculate_value_function=calculate_value, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=min(50, len(proposed_solution)), random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
-        optimizer.optimize(min(len(grouped_solution) * 5, 50*1000), None)
+        optimizer.optimize(max(min(len(grouped_solution) * 20, 50*1000), 5000), None)
         optimized = optimizer.best_solution
         solution: List[PointWithCommands] = []
         print(f"Normal: {calculate_value(grouped_solution)}, Optimized: {calculate_value(optimized)}")
@@ -180,7 +177,7 @@ class Project:
         
         optimized_commands: List[Command] = []
         for command_group in solution:
-            optimized_commands = optimized_commands + [Command(PlotterPosition(command.position.posX, command.position.posY, command.position.isHit)) for command in command_group.commands]
+            optimized_commands = optimized_commands + [Command(PlotterPosition(command.command_detail.posX, command.command_detail.posY, command.command_detail.isHit)) for command in command_group.commands]
         return optimized_commands
 
     def get_proposed_solution(self, label_image: ndarray, label: int) -> List[PointWithCommands]:
@@ -236,14 +233,14 @@ class Project:
             if(label_image[x, y] == label):
                 commands.append(Command(PlotterPosition(y, x, 1)))
             elif len(commands) > 0:
-                avgPosX = sum([com.position.posX for com in commands]) / len(commands)
-                avgPosY = sum([com.position.posY for com in commands]) / len(commands)
+                avgPosX = sum([com.command_detail.posX for com in commands]) / len(commands)
+                avgPosY = sum([com.command_detail.posY for com in commands]) / len(commands)
                 proposed_solution_xy.append(PointWithCommands(int(avgPosX), int(avgPosY), commands))
                 commands = []
                 
         if len(commands) > 0:
-            avgPosX = sum([com.position.posX for com in commands]) / len(commands)
-            avgPosY = sum([com.position.posY for com in commands]) / len(commands)
+            avgPosX = sum([com.command_detail.posX for com in commands]) / len(commands)
+            avgPosY = sum([com.command_detail.posY for com in commands]) / len(commands)
             proposed_solution_xy.append(PointWithCommands(int(avgPosX), int(avgPosY), commands))
             commands = []
         
