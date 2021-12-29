@@ -1,16 +1,21 @@
-from typing import ForwardRef, List
+from typing import Any, Generic, List, TypeVar
 import math 
 import random
 import numpy as np
 
 from src.plotter.domain.opimization_utils import *
+T = TypeVar('T')
 
-class PlotioTabuSearch:
-    def __init__(self, initial_solution: List[Point], tabu_tenure: int, optimizer_settings: OptimizerSettings, maximum_neighbors: int = None, random_neighbors: bool = False) -> None:
-        self.solution: List[Point] = initial_solution
-        self.solution_score: int = calculate_value(initial_solution)
-        self.best_solution: List[Point] = initial_solution
-        self.best_score: int = calculate_value(initial_solution)
+
+
+class PlotioTabuSearch(Generic[T]):
+    def __init__(self, initial_solution: List[T], tabu_tenure: int, optimizer_settings: OptimizerSettings, calculate_value_function: Any =calculate_value, calculate_value_after_move: Any =calculate_value_after_move, maximum_neighbors: int = None, random_neighbors: bool = False) -> None:
+        self.calculate_value_function: Any = calculate_value_function
+        self.calculate_value_after_move: Any = calculate_value_after_move
+        self.solution: List[Point] = initial_solution.copy()
+        self.solution_score: int = self.calculate_value_function(initial_solution)
+        self.best_solution: List[Point] = initial_solution.copy()
+        self.best_score: int = self.calculate_value_function(initial_solution)
         self.tabu_tenure: int = tabu_tenure
         self.restricted_moves: List[Move] = []       
         self.optimizer_settings: OptimizerSettings = optimizer_settings
@@ -36,14 +41,14 @@ class PlotioTabuSearch:
             for i in range(starting_index, ending_index):
                 for j in range(i + 1, ending_index):
                     move = Move(solution[i], solution[j], i, j)
-                    new_value = calculate_value_after_move(solution, solution_value, move)
+                    new_value = self.calculate_value_after_move(solution, solution_value, move)
                     possible_moves.append(PossibleMove(move, new_value))
         elif self.random_neighbors:
             for num_of_neighbors in range(self.maximum_neighbors):
                 point_a, point_b = np.random.randint(starting_index, ending_index, size=2)
                 move = Move(solution[point_a], solution[point_b], point_a, point_b)
                 
-                new_value = calculate_value_after_move(solution, solution_value, move)
+                new_value = self.calculate_value_after_move(solution, solution_value, move)
                 new_move = PossibleMove(move, new_value)
                 
                 # if(new_move in possible_moves):
@@ -60,7 +65,7 @@ class PlotioTabuSearch:
                         continue
                     
                     move = Move(solution[i], solution[j], i, j)
-                    new_value = calculate_value_after_move(solution, solution_value, move)
+                    new_value = self.calculate_value_after_move(solution, solution_value, move)
                     possible_moves.append(PossibleMove(move, new_value))
                     if(num_of_neighbors > self.maximum_neighbors):
                         self.moves_to_skip = self.moves_to_skip + num_of_neighbors
@@ -88,7 +93,7 @@ class PlotioTabuSearch:
                     self.solution_score = possible_move.value
                     
                     if(self.best_score > self.solution_score):
-                        self.best_solution = self.solution
+                        self.best_solution = self.solution.copy()
                         self.best_score = self.solution_score
                         iter_without_optimization = 0
                     else:

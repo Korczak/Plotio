@@ -78,6 +78,7 @@ class AutomaticCommandService:
             plotter_response = self.simulation_plotter.get_response()
             if plotter_response != None:
                 plotter_position = plotter_response.position
+                #is_response_received = True
                 
         if(plotter_position is not None):
             pub.sendMessage('PositionUpdated', arg1=plotter_position)

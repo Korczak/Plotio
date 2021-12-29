@@ -3,10 +3,12 @@ from typing import List, Optional
 
 from numpy import ndarray
 from numpy.core.fromnumeric import argmin
+from numpy.lib.function_base import delete
+from numpy.random.mtrand import f
 from src.plotter.domain.command import Command
 from src.plotter.domain.command_group import CommandGroup
-from src.plotter.domain.opimization_utils import OptimizerSettings, calculate_value_of_commands, swap_points
-from src.plotter.domain.optimization.nearest_objects import get_nearest_object
+from src.plotter.domain.opimization_utils import *
+from src.plotter.domain.optimization.nearest_objects import GroupOfPoints, get_nearest_object
 from src.plotter.domain.plotio_preprocess_command_to_optization import PreprocessCommandsToOptimization
 from src.plotter.domain.plotio_tabu_search import PlotioTabuSearch, Point, calculate_value
 import math
@@ -117,8 +119,11 @@ class Project:
         optimal = calculate_value_of_commands(optimized_commands)
         normal = calculate_value_of_commands(self.all_commands)
         
-        self.all_commands = optimized_commands
-        self.commands_to_do = optimized_commands
+        print(f"Optimal: {optimal}, Normal: {normal}")
+        
+        if(optimal < normal):
+            self.all_commands = optimized_commands.copy()
+            self.commands_to_do = optimized_commands.copy()
         self.status = ProjectStatus.Ready
         
     def optimize_path(self, method: OptimizationMethod):        
@@ -138,34 +143,53 @@ class Project:
         self.status = ProjectStatus.Ready
         
     def _optimize_command_groups(self, labels: ndarray, unique_labels: List[int], command_groups: List[CommandGroup], method: OptimizationMethod) -> List[Point]:
-        solution: List[Point] = []
+        grouped_solution: List[GroupOfPoints] = []
         current_position: PlotterPosition = PlotterPosition(0, 0, 0)
         active_command_group = command_groups.copy()
         
         while active_command_group != None and len(active_command_group) > 0:
             next_position, command_group_id = get_nearest_object(current_position, active_command_group)    
-            proposed_solution = self.get_proposed_solution(labels, labels[next_position.posY, next_position.posX])            
+            proposed_solution = self.get_proposed_solution(labels, labels[next_position.posY, next_position.posX])    
+            # #for command_group in proposed_solution:
+            # #    print(f"Point({command_group.posX}, {command_group.posY})")
+            # #swap_points(proposed_solution, next_position, proposed_solution[0])
+            # if len(proposed_solution) > 2 and len(proposed_solution) < 600:
+            #     optimizer = PlotioTabuSearch(proposed_solution.copy(), int(math.sqrt(len(proposed_solution))), calculate_value_function=calculate_value, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=min(50, len(proposed_solution)), random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
+            #     #optimizer = SimulatedAnnealing(proposed_solution.copy(), Conditions(100, 0.1, 0.2, 0.97, 100, Annealing.linear), calculate_value_function=calculate_value, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=400, random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
+            #     optimizer.optimize(min(len(proposed_solution) * 5, 50*1000), None)
+            #     optimized = optimizer.best_solution
+            #     solution = solution + optimized
+            #     print(f"Normal: {calculate_value(proposed_solution)}, Optimized: {calculate_value(optimized)}")
+            # else:
             
-            swap_points(proposed_solution, next_position, proposed_solution[0])
-            if len(proposed_solution) > 2 and len(proposed_solution) < 600:
-                tabu_optimizer = PlotioTabuSearch(proposed_solution.copy(), 30, maximum_neighbors=300, random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
-                optimized = tabu_optimizer.optimize(min(50, len(proposed_solution)), None)
-                solution = solution + optimized
-            else:
-                solution = solution + proposed_solution
-                
+            
+            avgPosX = sum([com.posX for com in proposed_solution]) / len(proposed_solution)
+            avgPosY = sum([com.posY for com in proposed_solution]) / len(proposed_solution)
+            grouped_solution.append(GroupOfPoints(avgPosX, avgPosY, proposed_solution))
             del active_command_group[command_group_id]
-             
-        optimized_commands = [Command(PlotterPosition(pos.posX, pos.posY, pos.hit)) for pos in solution]
+            
+            
+        
+        optimizer = PlotioTabuSearch(grouped_solution, int(math.sqrt(len(grouped_solution))), calculate_value_function=calculate_value, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=min(50, len(proposed_solution)), random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
+        optimizer.optimize(min(len(grouped_solution) * 5, 50*1000), None)
+        optimized = optimizer.best_solution
+        solution: List[PointWithCommands] = []
+        print(f"Normal: {calculate_value(grouped_solution)}, Optimized: {calculate_value(optimized)}")
+        for sol in optimized:
+            solution = solution + sol.commands
+        
+        optimized_commands: List[Command] = []
+        for command_group in solution:
+            optimized_commands = optimized_commands + [Command(PlotterPosition(command.position.posX, command.position.posY, command.position.isHit)) for command in command_group.commands]
         return optimized_commands
 
-    def get_proposed_solution(self, label_image: ndarray, label: int):
+    def get_proposed_solution(self, label_image: ndarray, label: int) -> List[PointWithCommands]:
         proposed_solution_xy, xy_value = self.get_proposed_solution_xy(label_image, label)
-        proposed_solution_yx, yx_value = self.get_proposed_solution_yx(label_image, label)
+        #proposed_solution_yx, yx_value = self.get_proposed_solution_yx(label_image, label)
                 
-        if(xy_value < yx_value):
-            return proposed_solution_xy
-        return proposed_solution_yx
+        #if(xy_value < yx_value):
+        #    return proposed_solution_xy
+        return proposed_solution_xy
 
     def get_proposed_solution_yx(self, label_image, label):
         proposed_solution_yx: List[Point] = []
@@ -184,20 +208,44 @@ class Project:
         return proposed_solution_yx,yx_value
 
     def get_proposed_solution_xy(self, label_image, label):
-        proposed_solution_xy: List[Point] = []
+        proposed_solution_xy: List[PointWithCommands] = []
         
         for x in range(0, label_image.shape[0]):
+            #if x % 2 == 0:
+            commands: List[Command] = []
             if x % 2 == 0:
-                for y in range(0, label_image.shape[1]):
-                    if(label_image[x, y] == label):
-                        proposed_solution_xy.append(Point(y, x, 1))
+                self.get_proposition_for_row(label_image, label, proposed_solution_xy, x, commands, 0, label_image.shape[1], 1)
             else:
-                for y in range(label_image.shape[1] - 1, 0, -1):
-                    if(label_image[x, y] == label):
-                        proposed_solution_xy.append(Point(y, x, 1))   
+                self.get_proposition_for_row(label_image, label, proposed_solution_xy, x, commands,  label_image.shape[1] - 1, 0, -1)
+        
+        current_position: PlotterPosition = PlotterPosition(0, 0, 0)
+        active_command_groups: List[PointWithCommands] = proposed_solution_xy.copy()
+        proposed_solution: List[PointWithCommands] = []
+        while active_command_groups != None and len(active_command_groups) > 0:
+            next_position, command_group_id = get_nearest_object(current_position, active_command_groups)
+            
+            current_position = next_position
+            proposed_solution.append(active_command_groups[command_group_id])
+            del active_command_groups[command_group_id]
                         
-        xy_value = calculate_value(proposed_solution_xy)
-        return proposed_solution_xy,xy_value
+        xy_value = calculate_value(proposed_solution)
+        return proposed_solution ,xy_value
+
+    def get_proposition_for_row(self, label_image, label, proposed_solution_xy, x, commands, start_index, end_index, step):
+        for y in range(start_index, end_index, step):
+            if(label_image[x, y] == label):
+                commands.append(Command(PlotterPosition(y, x, 1)))
+            elif len(commands) > 0:
+                avgPosX = sum([com.position.posX for com in commands]) / len(commands)
+                avgPosY = sum([com.position.posY for com in commands]) / len(commands)
+                proposed_solution_xy.append(PointWithCommands(int(avgPosX), int(avgPosY), commands))
+                commands = []
+                
+        if len(commands) > 0:
+            avgPosX = sum([com.position.posX for com in commands]) / len(commands)
+            avgPosY = sum([com.position.posY for com in commands]) / len(commands)
+            proposed_solution_xy.append(PointWithCommands(int(avgPosX), int(avgPosY), commands))
+            commands = []
         
     def _optimize_with_tabu(self, initial_solution: List[Point]):
         preprocessed_commands = PreprocessCommandsToOptimization(initial_solution, 40, 40, self.image_shape[1], self.image_shape[0])

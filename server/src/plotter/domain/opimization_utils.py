@@ -9,6 +9,18 @@ class OptimizerSettings:
         self.is_last_element_static: bool = is_last_element_static
         self.is_first_element_static : bool = is_first_element_static
 
+class PointWithCommands:
+    def __init__(self, posX: float, posY: float, commands: List[Command]) -> None:
+        self.posX: float = posX
+        self.posY: float = posY
+        self.commands: List[Command] = commands
+        
+    def __str__(self) -> str:
+        return f"({self.posX}, {self.posY})"
+    
+    def __eq__(self, other: object) -> bool:
+        return self.posX == other.posX and self.posY == other.posY
+
 class Point:
     def __init__(self, posX: float, posY: float, hit: 0 | 1 = 1) -> None:
         self.posX: float = posX
@@ -107,6 +119,23 @@ def calculate_value(solution: List[Point], show = False):
     for node in solution[1:]:
         value = value + get_distance(current_pos, node)
         current_pos = node
+    
+    
+    if(show):
+        solution_text = [str(sol) for sol in solution]
+        print(f'Value of solution {solution_text} is {value}')
+    
+    return value
+
+def calculate_value_of_point_with_commands(solution: List[PointWithCommands], show = False):
+    value = 0
+    current_pos = solution[0].commands[0].position
+    
+    for command_group in solution:
+        for command in command_group.commands:
+            value = value + get_distance(current_pos, command.position)
+            
+            current_pos = command.position
     
     
     if(show):

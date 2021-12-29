@@ -1,4 +1,4 @@
-from typing import ForwardRef, List
+from typing import Any, ForwardRef, List
 import math 
 import random
 import numpy as np
@@ -35,30 +35,36 @@ def logarithmic_annealing(T: float, epoch: float):
 
 
 class SimulatedAnnealing:
-    def __init__(self, initial_solution: List[Point], conditions: Conditions, is_first_and_last_element_static: bool = True) -> None:
+    def __init__(self, initial_solution: List[Point], conditions: Conditions, optimizer_settings: OptimizerSettings, calculate_value_function: Any =calculate_value, calculate_value_after_move: Any =calculate_value_after_move, maximum_neighbors: int = None, random_neighbors: bool = False) -> None:
         self.solution: List[Point] = initial_solution.copy()
-        self.solution_score: int = calculate_value(self.solution)
+        self.solution_score: int = calculate_value_function(self.solution)
         self.best_solution: List[Point] = initial_solution.copy()
         self.best_solution_score: int = self.solution_score
         self.solution_length = len(self.solution)
-        self.is_first_and_last_element_static: bool = is_first_and_last_element_static
-        
+
+        self.optimizer_settings: OptimizerSettings = optimizer_settings
+        self.calculate_value_function: Any = calculate_value_function
+        self.calculate_value_after_move: Any = calculate_value_after_move
+
         self.conditions: Conditions = conditions
         self.T = conditions.T0
         self.epoch = 1
         
     def optimize(self):
         newPermutationIter = 0
+        first_elem_index, last_elem_index = 0, self.solution_length
+        if(self.optimizer_settings.is_first_element_static):
+            first_elem_index = 1
+        if(self.optimizer_settings.is_last_element_static):
+            last_elem_index = self.solution_length - 1
+            
         while(self.T > self.conditions.T_end):
-            for k in range(1, self.conditions.L):
-                if(self.is_first_and_last_element_static):                
-                    i, j = np.random.randint(1, self.solution_length - 1, size=2)
-                else:
-                    i, j = np.random.randint(0, self.solution_length, size=2)
+            for k in range(1, self.conditions.L): 
+                i, j = np.random.randint(first_elem_index, last_elem_index, size=2)
                     
                 curr_score = self.solution_score
                 self.solution = swap_indexes(self.solution, i, j)
-                self.solution_score = calculate_value(self.solution)
+                self.solution_score = self.calculate_value_function(self.solution)
                 
                 if self.best_solution_score > self.solution_score:
                     self.best_solution_score = self.solution_score
@@ -70,7 +76,7 @@ class SimulatedAnnealing:
                         newPermutationIter = newPermutationIter + 1
                     else:
                         self.solution = swap_indexes(self.solution, i, j)
-                        self.solution_score = calculate_value(self.solution)
+                        self.solution_score = self.calculate_value_function(self.solution)
             
             if(self.conditions.annealing == Annealing.linear):
                 self.T = linear_annealing(self.T, self.conditions.linear_step)

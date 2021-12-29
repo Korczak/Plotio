@@ -7,7 +7,7 @@ from base64 import urlsafe_b64decode, b64decode, b64encode
 from src.plotter.domain.command import Command
 from src.plotter.domain.command_group import CommandGroup
 from src.plotter.domain.plotter_position import PlotterPosition
-from src.plotter.domain.project import Project, ProjectStatus
+from src.plotter.domain.project import OptimizationMethod, Project, ProjectStatus
 from src.plotter.infrastructure.plotter_repository import PlotterRepository
 
 from src.plotter.infrastructure.project_repository import ProjectRepository
@@ -31,7 +31,8 @@ class ImageAdapter:
         
         ret, thresh_img = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY)
         
-        equivalency_list, labels = self.extract_sub_images(img, thresh_img)
+        object_color = 0
+        equivalency_list, labels, num_of_commands = self.extract_sub_images(img, thresh_img, object_color)
         
         commandGroups: List[CommandGroup] = []
         
@@ -39,30 +40,49 @@ class ImageAdapter:
         
         #commandGroups.append(CommandGroup([Command(PlotterPosition(0, 0, 0))]))
         
-        for label in unique_labels:
-            commands: List[Command] = []
+        if num_of_commands > 50000:
+            all_commands: List[Command] = []
             for x in range(0, img.shape[0]):
-                for y in range(0, img.shape[1]):
-                    if(labels[x, y] == label):
-                        commands.append(Command(PlotterPosition(y, x, 1)))
+                if x % 2 == 0:
+                    for y in range(0, img.shape[1]):
+                        if(thresh_img[x, y] == object_color):
+                            all_commands.append(Command(PlotterPosition(y, x, 1)))
+                else:
+                    for y in range(img.shape[1] - 1, 0, -1):
+                        if(thresh_img[x, y] == object_color):
+                            all_commands.append(Command(PlotterPosition(y, x, 1)))
             
-            commandGroups.append(CommandGroup(commands))
-                    
-        #commandGroups.append(CommandGroup([Command(PlotterPosition(0, 0, 0))]))     
-        all_commands: List[Command] = []
-        for commandGroup in commandGroups:
-            all_commands = all_commands + commandGroup.commands        
-        
-        plotter = self.plotter_repository.get_plotter()
-        plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, all_commands, all_commands, thresh_img, img.shape))
-        self.plotter_repository.update_plotter(plotter)
-        
-        self.optimize_path_service.optimize_command_group_path(labels, unique_labels, plotter, commandGroups)
+            plotter = self.plotter_repository.get_plotter()
+            plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, all_commands, all_commands, thresh_img, img.shape))
+            self.plotter_repository.update_plotter(plotter)
+            
+            self.optimize_path_service.optimize_command_group_path(labels, unique_labels, plotter, commandGroups)
+            
+        else:
+            for label in unique_labels:
+                commands: List[Command] = []
+                for x in range(0, img.shape[0]):
+                    for y in range(0, img.shape[1]):
+                        if(labels[x, y] == label):
+                            commands.append(Command(PlotterPosition(y, x, 1)))
+                
+                commandGroups.append(CommandGroup(commands))
+                        
+            #commandGroups.append(CommandGroup([Command(PlotterPosition(0, 0, 0))]))     
+            all_commands: List[Command] = []
+            for commandGroup in commandGroups:
+                all_commands = all_commands + commandGroup.commands        
+            
+            plotter = self.plotter_repository.get_plotter()
+            plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, all_commands, all_commands, thresh_img, img.shape))
+            self.plotter_repository.update_plotter(plotter)
+            
+            self.optimize_path_service.optimize_command_group_path(labels, unique_labels, plotter, commandGroups, OptimizationMethod.TabuSearch)
 
-    def extract_sub_images(self, img, thresh_img):
+    def extract_sub_images(self, img: np.ndarray, thresh_img: np.ndarray, object_color: int):
         labels = np.zeros((img.shape[0], img.shape[1]))
+        num_of_commands = 0
         
-        object_color = 0
         curr_obj = 0
         equivalency_list = {}
         pixel_above, pixel_left = 0, 0
@@ -100,4 +120,5 @@ class ImageAdapter:
             for y in range(0, img.shape[1]):
                 if(thresh_img[x][y] == object_color):
                     labels[x][y] = equivalency_list[int(labels[x][y])]
-        return equivalency_list, labels
+                    num_of_commands = num_of_commands + 1
+        return equivalency_list, labels, num_of_commands

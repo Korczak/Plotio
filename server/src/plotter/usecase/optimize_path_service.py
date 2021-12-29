@@ -10,8 +10,8 @@ class OptimizePathService:
     def __init__(self, plotter_repository: PlotterRepository) -> None:
         self.plotter_repository: PlotterRepository = plotter_repository
 
-    def optimize_command_group_path(self, labels: ndarray, unique_labels: List[int], plotter: Plotter, command_groups: List[CommandGroup]):
-        plotter.project.optimize_command_group_path(labels, unique_labels, OptimizationMethod.TabuSearch, command_groups)
+    def optimize_command_group_path(self, labels: ndarray, unique_labels: List[int], plotter: Plotter, command_groups: List[CommandGroup], optimization_method: OptimizationMethod = OptimizationMethod.DoNotOptimize):
+        plotter.project.optimize_command_group_path(labels, unique_labels, optimization_method, command_groups)
         self.plotter_repository.update_plotter(plotter)
         
     def optimize_path(self, plotter: Plotter):
