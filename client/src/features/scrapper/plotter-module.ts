@@ -12,12 +12,14 @@ import IconTextBtn from "./components/atoms/icon-text-btn.vue";
 import Bar from "./components/atoms/bar.vue";
 import LoadingInProgress from "./components/atoms/loading-in-progress.vue";
 import ErrorSnackbar from "./components/atoms/error-snackbar.vue";
+import CardDialog from "./components/atoms/card-dialog.vue";
 import { PlotterStore } from "./store/plotter-store";
 
 Vue.component("icon-text-btn", IconTextBtn);
 Vue.component("bar", Bar);
 Vue.component("loading-in-progress", LoadingInProgress);
 Vue.component("error-snackbar", ErrorSnackbar);
+Vue.component("card-dialog", CardDialog);
 
 const plotterRoutes: RouteConfig[] = [
   {

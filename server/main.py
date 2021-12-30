@@ -8,6 +8,7 @@ from fastapi import Depends, FastAPI, HTTPException, status, BackgroundTasks
 from fastapi_socketio import SocketManager
 from fastapi.middleware.cors import CORSMiddleware
 from src.image import image_controller
+from src.optimize import optimize_controller
 
 from src.plotter import plotter_controller
 from src.plotter.module import PlotterModule
@@ -33,12 +34,14 @@ app.add_middleware(
 )
 
 container = Container()
+container.optimize.project_adapter().subscribe()
 container.plotter.plotter_position_service().subscribe()
+container.plotter.optimize_adapter().subscribe()
 container.plotter.image_adapter().subscribe()
 container.plotter.alarm_service().subscribe()
 container.plotter.alert_service().subscribe()
 
-container.wire(modules=[__name__, image_controller, plotter_controller])
+container.wire(modules=[__name__, image_controller, plotter_controller, optimize_controller])
 app.container = container
 
 
@@ -46,6 +49,7 @@ socket_manager = SocketManager(app=app, cors_allowed_origins=[], mount_location=
 
 app.include_router(plotter_controller.router)
 app.include_router(image_controller.router)
+app.include_router(optimize_controller.router)
 
 @app.on_event('startup')
 async def app_startup():

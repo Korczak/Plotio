@@ -1,12 +1,16 @@
 <template>
   <div>
     <import-image :dialog.sync="isImageImport"></import-image>
+    <graphics-editor v-model="isGraphicEditor"></graphics-editor>
     <v-container fluid class="py-0">
       <v-row class="mt-2">
         <v-col cols="7">
           <v-row>
             <v-col cols="8" class="py-0">
-              <plotter-menu @onImport="isImageImport = true"></plotter-menu>
+              <plotter-menu
+                @onImport="isImageImport = true"
+                @onGraphicsEditor="isGraphicEditor = true"
+              ></plotter-menu>
             </v-col>
             <v-col cols="4" class="py-0">
               <control></control>
@@ -55,6 +59,7 @@ import Simulation from "../components/organisms/simulation.vue";
 import ImportImage from "../components/organisms/import_image.vue";
 import StatusBar from "../components/organisms/status_bar.vue";
 import AlarmDialog from "../components/molecules/alarm_dialog.vue";
+import GraphicsEditor from "../components/organisms/graphics_editor.vue";
 //import { rootGet } from "@/api/index";
 
 @Component({
@@ -68,11 +73,13 @@ import AlarmDialog from "../components/molecules/alarm_dialog.vue";
     ImportImage,
     StatusBar,
     AlarmDialog,
+    GraphicsEditor,
   },
 })
 export default class Plotter extends Vue {
   message: string = "";
   isImageImport = false;
+  isGraphicEditor: boolean = false;
 
   created() {
     console.log(this.$socket);

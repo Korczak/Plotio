@@ -2,10 +2,9 @@ from typing import Any, ForwardRef, List
 import math 
 import random
 import numpy as np
-from src.plotter.domain.opimization_utils import *
-
-from src.plotter.domain.plotio_tabu_search import Move, Point, PossibleMove
 import enum
+
+from src.optimize.domain.opimization_utils import *
 
 class Annealing(enum.Enum):
     linear = 1

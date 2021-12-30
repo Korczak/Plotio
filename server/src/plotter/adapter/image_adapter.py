@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 from pubsub import pub
 from base64 import urlsafe_b64decode, b64decode, b64encode
+from src.events.events_name import EventsName
+from src.optimize.domain.optimize_project import OptimizeProject
 from src.plotter.domain.command import Command
 from src.plotter.domain.command_group import CommandGroup
 from src.plotter.domain.plotter_position import PlotterPosition
@@ -12,16 +14,14 @@ from src.plotter.infrastructure.plotter_repository import PlotterRepository
 
 from src.plotter.infrastructure.project_repository import ProjectRepository
 from src.events.image_added import ImageAdded
-from src.plotter.usecase.optimize_path_service import OptimizePathService
 
 class ImageAdapter:
-    def __init__(self, project_repository: ProjectRepository, plotter_repository: PlotterRepository, optimize_path_service: OptimizePathService) -> None:
+    def __init__(self, project_repository: ProjectRepository, plotter_repository: PlotterRepository) -> None:
         self.project_repository: ProjectRepository = project_repository
         self.plotter_repository: PlotterRepository = plotter_repository
-        self.optimize_path_service: OptimizePathService = optimize_path_service
 
     def subscribe(self):
-        pub.subscribe(self.on_add_image, 'ImageAdded')
+        pub.subscribe(self.on_add_image, EventsName.ImageAdded)
 
     def on_add_image(self, arg1: ImageAdded):
         b64 = urlsafe_b64decode(str(arg1.content)); 
@@ -37,9 +37,8 @@ class ImageAdapter:
         commandGroups: List[CommandGroup] = []
         
         unique_labels = list(set(equivalency_list.values()))
-        
-        #commandGroups.append(CommandGroup([Command(PlotterPosition(0, 0, 0))]))
-        
+                
+            
         if num_of_commands > 50000:
             all_commands: List[Command] = []
             for x in range(0, img.shape[0]):
@@ -51,12 +50,6 @@ class ImageAdapter:
                     for y in range(img.shape[1] - 1, 0, -1):
                         if(thresh_img[x, y] == object_color):
                             all_commands.append(Command(PlotterPosition(y, x, 1)))
-            
-            plotter = self.plotter_repository.get_plotter()
-            plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, all_commands, all_commands, thresh_img, thresh_img, img.shape))
-            self.plotter_repository.update_plotter(plotter)
-            
-            self.optimize_path_service.optimize_command_group_path(labels, unique_labels, plotter, commandGroups)
             
         else:
             for label in unique_labels:
@@ -71,12 +64,12 @@ class ImageAdapter:
             for commandGroup in commandGroups:
                 all_commands = all_commands + commandGroup.commands        
             
-            plotter = self.plotter_repository.get_plotter()
-            plotter.add_project(Project(arg1.name, True, ProjectStatus.NotStarted, all_commands, all_commands, thresh_img, thresh_img, img.shape))
-            self.plotter_repository.update_plotter(plotter)
-            
-            self.optimize_path_service.optimize_command_group_path(labels, unique_labels, plotter, commandGroups, OptimizationMethod.TabuSearch)
-
+        plotter = self.plotter_repository.get_plotter()
+        plotter.add_project(Project(arg1.name, True, ProjectStatus.Ready, all_commands, all_commands, thresh_img, thresh_img, img.shape))
+        self.plotter_repository.update_plotter(plotter)            
+        optimize_project = OptimizeProject(arg1.name, all_commands, all_commands, thresh_img, labels, unique_labels, commandGroups)
+        pub.sendMessage(EventsName.ProjectAdded, arg1=optimize_project)
+        
     def extract_sub_images(self, img: np.ndarray, thresh_img: np.ndarray, object_color: int):
         labels = np.zeros((img.shape[0], img.shape[1]))
         num_of_commands = 0

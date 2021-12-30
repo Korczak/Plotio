@@ -1,6 +1,7 @@
 import math
 from typing import List
-from src.plotter.domain.plotio_tabu_search import Point
+
+from src.optimize.domain.opimization_utils import *
 
 
 class PreprocessCommandsToOptimization:

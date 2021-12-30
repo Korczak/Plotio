@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List
 from pubsub import pub
 from pydantic.main import BaseModel
+from src.events.events_name import EventsName
 from src.plotter.domain.alert import Alert, AlertType
 from src.plotter.infrastructure.alert_repository import AlertRepository
 
@@ -29,11 +30,11 @@ class AlertService:
         return AlertResponse(alerts=alerts_to_return)
     
     def subscribe(self):
-        pub.subscribe(self.project_completed, 'ProjectCompleted')
-        pub.subscribe(self.project_paused, 'ProjectPaused')
-        pub.subscribe(self.project_stopped, 'ProjectStopped')
-        pub.subscribe(self.project_started, 'ProjectStarted')
-        pub.subscribe(self.project_resumed, 'ProjectResumed')
+        pub.subscribe(self.project_completed, EventsName.ProjectCompleted)
+        pub.subscribe(self.project_paused, EventsName.ProjectPaused)
+        pub.subscribe(self.project_stopped, EventsName.ProjectStopped)
+        pub.subscribe(self.project_started, EventsName.ProjectStarted)
+        pub.subscribe(self.project_resumed, EventsName.ProjectResumed)
 
     def project_completed(self):
         self.alert_repository.add_alert(Alert("Ukończono projekt", AlertType.Success))

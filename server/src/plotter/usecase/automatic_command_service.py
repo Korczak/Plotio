@@ -1,5 +1,6 @@
 from pubsub import pub
 from pymitter import EventEmitter
+from src.events.events_name import EventsName
 from src.plotter.domain.actual_plotter_communicator import ActualPlotterCommunicator
 from src.plotter.domain.alarm import Alarm, AlarmType
 from src.plotter.domain.command import Command, CommandStatus
@@ -82,12 +83,12 @@ class AutomaticCommandService:
                 #is_response_received = True
                 
         if(plotter_position is not None):
-            pub.sendMessage('PositionUpdated', arg1=plotter_response)
+            pub.sendMessage(EventsName.PositionUpdated, arg1=plotter_response)
         if(current_command is not None and plotter_response != None and plotter_response.isCommandDone == True):
-            pub.sendMessage('CommandDone', arg1=plotter_response)
+            pub.sendMessage(EventsName.CommandDone, arg1=plotter_response)
         if(plotter_response.alarmStatus == True):
             alarm = Alarm("Wyjechano poza obszar", AlarmType.Error, True, None)
-            pub.sendMessage('PlotterAlarmSet', arg1=alarm)
+            pub.sendMessage(EventsName.PlotterAlarmSet, arg1=alarm)
         #TODO: All events should be moved to domain
         
         return is_response_received

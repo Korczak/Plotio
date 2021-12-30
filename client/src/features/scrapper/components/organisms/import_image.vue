@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-dialog v-model="dialogSync" persistent max-width="600px">
-      <v-form ref="form">
+      <v-form ref="form" v-if="!importingFile">
         <v-card>
           <v-card-title>
             <span class="text-h5">Wgraj zdjęcie</span>
@@ -13,7 +13,12 @@
               accept="image/*"
               label="Zdjęcie"
             ></v-file-input>
-            <v-img v-if="isFileLoaded" :src="fileSource"></v-img>
+            <v-img
+              v-if="isFileLoaded"
+              :src="fileSource"
+              max-height="300px"
+              max-width="300px"
+            ></v-img>
           </v-card-text>
           <v-card-actions>
             <v-btn color="error" tile @click="dialogSync = false">
@@ -24,6 +29,11 @@
           </v-card-actions>
         </v-card>
       </v-form>
+      <v-card v-if="importingFile">
+        <loading-in-progress
+          title="Importowanie obrazka..."
+        ></loading-in-progress>
+      </v-card>
     </v-dialog>
   </div>
 </template>
@@ -39,6 +49,7 @@ export default class ImportImage extends Vue {
   file: File | null = null;
   fileSource: any = null;
   isFileLoaded: boolean = false;
+  importingFile: boolean = false;
 
   @Watch("file")
   onFileChanged() {
@@ -48,7 +59,7 @@ export default class ImportImage extends Vue {
 
   async saveImage() {
     if ((this.$refs["form"] as any).validate() == false) return;
-    console.log(this.fileSource);
+    this.importingFile = true;
     let fileContent = await this.getBase64(this.file);
     await addImageImageAddImagePost({
       body: {
@@ -58,6 +69,7 @@ export default class ImportImage extends Vue {
     });
 
     this.dialogSync = false;
+    this.importingFile = false;
   }
 
   getBase64(file: any) {

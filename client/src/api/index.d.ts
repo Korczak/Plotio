@@ -156,6 +156,12 @@ type AddImageImageAddImagePostResult0 = RequestResult<object>;
 */
 export function addImageImageAddImagePost(params: AddImageImageAddImagePostParams0): AddImageImageAddImagePostResult0;
 
+type OptimizeProjectOptimizeOptimizeProjectActualPostResult0 = RequestResult<object>;
+/**
+* Optimize Project
+*/
+export function optimizeProjectOptimizeOptimizeProjectActualPost(): OptimizeProjectOptimizeOptimizeProjectActualPostResult0;
+
 type RootGetResult0 = RequestResult<object>;
 /**
 * Root

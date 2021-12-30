@@ -1,0 +1,12 @@
+class EventsName:
+    ProjectAdded="ProjectAdded"
+    ProjectStarted="ProjectStarted"
+    ProjectStopped="ProjectStopped"
+    ProjectPaused="ProjectPaused"
+    ProjectResumed="ProjectResumed"
+    ProjectCompleted="ProjectCompleted"
+    ImageAdded="ImageAdded"
+    PlotterAlarmSet="PlotterAlarmSet"
+    CommandDone="CommandDone"
+    PositionUpdated="PositionUpdated"
+    ProjectOptimalized="ProjectOptimalized"

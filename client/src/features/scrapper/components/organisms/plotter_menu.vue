@@ -10,14 +10,14 @@
         </div>
       </v-btn>
       <v-btn class="ma-2 fab-height">
-        <div class="wrapper" @click="emitEvent('onSttings')">
+        <div class="wrapper" @click="emitEvent('onSettings')">
           <div>Ustawienia</div>
           <div>
             <v-icon>mdi-cog</v-icon>
           </div>
         </div>
       </v-btn>
-      <v-btn class="fab-height" @click="emitEvent('onEditor')">
+      <v-btn class="fab-height" @click="emitEvent('onGraphicsEditor')">
         <div class="wrapper">
           <div>Edycja grafiki</div>
           <div>
@@ -37,6 +37,7 @@ import AutomaticModeBlockCard from "../molecules/automatic_mode_block_card.vue";
 @Component({ components: { AutomaticModeBlockCard } })
 export default class PlotterMenu extends Vue {
   emitEvent(event: string) {
+    console.log("EVENT");
     this.$emit(event);
   }
 }

@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List
 from pubsub import pub
 from pydantic.main import BaseModel
+from src.events.events_name import EventsName
 from src.plotter.domain.alarm import Alarm
 from src.plotter.domain.alert import AlertType
 from src.plotter.domain.plotter import Plotter
@@ -39,7 +40,7 @@ class AlarmService:
             self.plotter_repository.update_plotter(plotter)
                
     def subscribe(self):
-        pub.subscribe(self.on_alarm_set, 'PlotterAlarmSet')
+        pub.subscribe(self.on_alarm_set, EventsName.PlotterAlarmSet)
 
     def on_alarm_set(self, arg1: Alarm):
         plotter: Plotter = self.plotter_repository.get_plotter()

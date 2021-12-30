@@ -3,7 +3,7 @@ import math
 import random
 import numpy as np
 
-from src.plotter.domain.opimization_utils import *
+from src.optimize.domain.opimization_utils import *
 T = TypeVar('T')
 
 

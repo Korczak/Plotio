@@ -1,3 +1,4 @@
+from src.events.events_name import EventsName
 from src.plotter.domain.alert import Alert, AlertType
 from src.plotter.domain.plotter_communicator_interface import PlotterResponse
 from src.plotter.domain.plotter_position import PlotterPosition
@@ -25,8 +26,8 @@ class PlotterPositionService:
         self.simulation_plotter: SimulationPlotterCommunicator = simulation_plotter
 
     def subscribe(self):
-        pub.subscribe(self.on_update_position, 'PositionUpdated')
-        pub.subscribe(self.on_command_done, 'CommandDone')
+        pub.subscribe(self.on_update_position, EventsName.PositionUpdated)
+        pub.subscribe(self.on_command_done, EventsName.CommandDone)
 
     def on_update_position(self, arg1: PlotterResponse):
         plotter: Plotter = self.plotter_repository.get_plotter()

@@ -126,6 +126,9 @@ class Plotter:
         
         self.project.complete_current_command()
         
+        if self.project.is_completed_project():
+            self.complete_project()
+        
     def is_alarm_active(self):
         if self.alarm != None and self.alarm.enabled == True:
             return True

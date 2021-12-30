@@ -100,6 +100,10 @@ export function addImageImageAddImagePost(params) {
   return request("post", `/image/add-image`, { "header": { "accept": "application/json", "Content-Type": "application/json", }, })(params);
 }
 
+export function optimizeProjectOptimizeOptimizeProjectActualPost() {
+  return request("post", `/optimize/optimize/project/actual`, { "header": { "Content-Type": "application/json", }, })();
+}
+
 export function rootGet() {
   return request("get", `/`, { "header": { "Content-Type": "application/json", }, })();
 }

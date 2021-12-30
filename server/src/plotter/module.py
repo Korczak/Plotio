@@ -1,5 +1,6 @@
 from pymitter import EventEmitter
 from src.plotter.adapter.image_adapter import ImageAdapter
+from src.plotter.adapter.optimize_adapter import OptimizeAdapter
 from src.plotter.domain.actual_plotter_communicator import ActualPlotterCommunicator
 from src.plotter.domain.simulation_plotter_communicator import SimulationPlotterCommunicator
 from src.plotter.infrastructure.alarm_repository import AlarmRepository
@@ -11,7 +12,7 @@ from src.plotter.usecase.alert_service import AlertService
 from src.plotter.usecase.automatic_command_service import AutomaticCommandService
 from src.plotter.usecase.connect_service import ConnectService
 from src.plotter.usecase.manual_command_service import ManualCommandInput, ManualCommandService
-from src.plotter.usecase.optimize_path_service import OptimizePathService
+from src.optimize.usecase.optimize_path_service import OptimizePathService
 from src.plotter.usecase.plotter_position_service import PlotterPositionService
 from src.plotter.usecase.plotter_settings_service import PlotterSettingsService
 from src.plotter.usecase.progress_info_service import ProgressInfoService
@@ -24,20 +25,6 @@ from src.plotter.usecase.plotter_mode_service import PlotterModeService
 
 
 class PlotterModule(containers.DeclarativeContainer):
-
-
-    # config = providers.Configuration(yaml_files=["config.yml"])
-
-    # plotter_client = providers.Factory( 
-    #     api_key=config.giphy.api_key,
-    #     timeout=config.giphy.request_timeout,
-    # )
-
-    # search_service = providers.Factory(
-    #     services.SearchService,
-    #     giphy_client=giphy_client,
-    # )
-    
     alarm_repository=providers.Singleton(AlarmRepository)
     project_repository=providers.Singleton(ProjectRepository)
     plotter_repository=providers.Singleton(PlotterRepository, project_repository=project_repository, alarm_repository=alarm_repository)
@@ -50,7 +37,6 @@ class PlotterModule(containers.DeclarativeContainer):
     render_simulation_service = providers.Singleton(RenderSimulationService, plotter_repository=plotter_repository, project_repository=project_repository)
     plotter_mode_service = providers.Singleton(PlotterModeService, plotter_repository=plotter_repository)
     project_service = providers.Singleton(ProjectService, plotter_repository=plotter_repository, project_repository = project_repository, alert_repository=alert_repository)
-    optimize_service = providers.Singleton(OptimizePathService, plotter_repository=plotter_repository)
     alert_service = providers.Singleton(AlertService, alert_repository=alert_repository)    
     progress_info_service = providers.Singleton(ProgressInfoService, plotter_repository=plotter_repository)
     alarm_service = providers.Singleton(AlarmService, alarm_repository=alarm_repository, plotter_repository = plotter_repository)
@@ -84,5 +70,6 @@ class PlotterModule(containers.DeclarativeContainer):
     image_adapter = providers.Singleton(
         ImageAdapter, 
         project_repository=project_repository, 
-        plotter_repository=plotter_repository, 
-        optimize_path_service= optimize_service)
+        plotter_repository=plotter_repository)
+    optimize_adapter = providers.Singleton(OptimizeAdapter, project_repository=project_repository)
+

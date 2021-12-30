@@ -2,9 +2,9 @@ import math
 from typing import List
 
 import numpy as np
+from src.optimize.domain.opimization_utils import Point, PointWithCommands, get_distance
 
 from src.plotter.domain.command_group import CommandGroup
-from src.plotter.domain.opimization_utils import Point, PointWithCommands, get_distance
 from src.plotter.domain.plotter_position import PlotterPosition
 
 
