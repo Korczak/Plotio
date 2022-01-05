@@ -27,7 +27,7 @@ interface Alert {
 
 @Component({ components: {} })
 export default class MessagesBar extends Mixins(RetrieverLoop) {
-  items: Alert[] = [{ text: "A", type: "Error" }];
+  items: Alert[] = [];
 
   async mounted() {
     this.retrieve_loop(this.getAlerts);
