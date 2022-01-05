@@ -56,8 +56,9 @@ class Project:
 
     def complete_project(self):
         self.is_active = False
-        self.status = ProjectStatus.Completed
-        pub.sendMessage(EventsName.ProjectCompleted)
+        if(self.status != ProjectStatus.Completed):
+            self.status = ProjectStatus.Completed
+            pub.sendMessage(EventsName.ProjectCompleted)
         
     def stop_project(self):
         self.is_active = False
