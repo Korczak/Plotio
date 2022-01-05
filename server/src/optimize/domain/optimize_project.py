@@ -20,16 +20,40 @@ from itertools import chain
 
 
 class OptimizeProject:
-    def __init__(self, name: str, all_commands: List[Command], commands_to_do: List[Command], image_content: ndarray, labels: ndarray, unique_labels: List[int], command_groups: List[CommandGroup]) -> None:
+    def __init__(self, name: str, all_commands: List[Command], commands_to_do: List[Command], image_content: ndarray) -> None:
         self.name = name
         self.all_commands: List[Command] = all_commands.copy()
         self.commands_to_do: List[Command] = commands_to_do
         self.image_content: ndarray = image_content
-        self.labels: ndarray = labels
-        self.unique_labels: List[int] = unique_labels
-        self.command_groups: List[CommandGroup] = command_groups
+        self.labels: ndarray = None
+        self.unique_labels: List[int] = None
+        self.command_groups: List[CommandGroup] = None
     
-    def optimize_command_groups(self, method: OptimizationMethod) -> List[Command[PlotterPosition]]:        
+    def optimize_command_groups(self, method: OptimizationMethod) -> List[Command[PlotterPosition]]:   
+        object_color = 0
+        equivalency_list, labels, num_of_commands = self._extract_sub_images(self.image_content, object_color)
+        
+        commandGroups: List[CommandGroup] = []
+        
+        unique_labels = list(set(equivalency_list.values()))
+    
+        if num_of_commands > 50000:
+            return self.all_commands
+        else:
+            for label in unique_labels:
+                commandGroups.append(CommandGroup([]))
+            for x in range(0, self.image_content.shape[0]):
+                for y in range(0, self.image_content.shape[1]):
+                    if(labels[x, y] != 0):
+                        commandGroups[unique_labels.index(labels[x, y])].commands.append(Command(PlotterPosition(y, x, 1)))
+                        
+            #commandGroups.append(CommandGroup([Command(PlotterPosition(0, 0, 0))]))     
+            all_commands: List[Command] = []
+            for commandGroup in commandGroups:
+                all_commands = all_commands + commandGroup.commands        
+
+        
+         
         initial_solution = [Point(point.command_detail.posX, point.command_detail.posY, point.command_detail.isHit) for point in self.all_commands]
         
         optimized_commands = None
@@ -43,6 +67,50 @@ class OptimizeProject:
         
         return optimized_commands
     
+    def _extract_sub_images(self, img: np.ndarray, thresh_img: np.ndarray, object_color: int):
+        labels = np.zeros((img.shape[0], img.shape[1]))
+        num_of_commands = 0
+        
+        curr_obj = 0
+        equivalency_list = {}
+        pixel_above, pixel_left = 0, 0
+        
+        
+        for x in range(0, img.shape[0]):
+            for y in range(0, img.shape[1]):
+                if(thresh_img[x, y] == object_color):
+                    pixel_above, pixel_left = 0, 0
+                    
+                    if y > 0:
+                        if labels[x][y-1] > 0:
+                            pixel_above = equivalency_list[labels[x][y-1]]
+                    
+                    if x > 0:
+                        if labels[x-1][y] > 0:
+                            pixel_left = equivalency_list[labels[x-1][y]]
+                        
+                    if pixel_above != 0 and pixel_left != 0:
+                        classification = min(pixel_above, pixel_left)
+                        equivalency_list[pixel_left] = classification
+                        equivalency_list[pixel_above] = classification
+                    elif pixel_above != 0:
+                        classification = pixel_above
+                    elif pixel_left != 0:
+                        classification = pixel_left
+                    else:
+                        curr_obj += 1 
+                        equivalency_list[curr_obj] = curr_obj
+                        classification = curr_obj
+                      
+                    labels[x][y] = int(classification)
+
+        for x in range(0, img.shape[0]):
+            for y in range(0, img.shape[1]):
+                if(thresh_img[x][y] == object_color):
+                    labels[x][y] = equivalency_list[int(labels[x][y])]
+                    num_of_commands = num_of_commands + 1
+        return equivalency_list, labels, num_of_commands
+
     def _optimize_command_groups(self, labels: ndarray, unique_labels: List[int], command_groups: List[CommandGroup], method: OptimizationMethod) -> List[Point]:
         grouped_solution: List[GroupOfPoints] = []
         next_position: PlotterPosition = PlotterPosition(0, 0, 0)
