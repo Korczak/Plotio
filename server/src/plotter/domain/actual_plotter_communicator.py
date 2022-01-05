@@ -7,6 +7,7 @@ from pymitter import EventEmitter
 from pubsub import pub
 import serial
 import serial.tools.list_ports
+import time
 
 import asyncio
 import json
@@ -22,7 +23,16 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         if(self.is_connected() == False):
             return None
         try:
-            response = self.arduino.readline().decode()
+            response = self.arduino.readline()
+
+            while not '\n'in str(response):
+                time.sleep(.001)   
+                temp = self.arduino.readline()
+
+                if not not temp.decode():
+                    response = (response.decode()+temp.decode()).encode()
+
+            response = response.decode()
             print(response)
             processed_response = response.split(",")
             return PlotterResponse(bool(int(processed_response[0])), bool(int(processed_response[1])), PlotterPosition(int(processed_response[2]), int(processed_response[3]), 0))
