@@ -86,7 +86,7 @@ class AutomaticCommandService:
             pub.sendMessage(EventsName.PositionUpdated, arg1=plotter_response)
         if(current_command is not None and plotter_response != None and plotter_response.isCommandDone == True):
             pub.sendMessage(EventsName.CommandDone, arg1=plotter_response)
-        if(plotter_response.alarmStatus == True):
+        if(plotter_response is not None and plotter_response.alarmStatus == True):
             alarm = Alarm("Wyjechano poza obszar", AlarmType.Error, True, None)
             pub.sendMessage(EventsName.PlotterAlarmSet, arg1=alarm)
         #TODO: All events should be moved to domain

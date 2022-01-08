@@ -7,10 +7,10 @@ from pymitter import EventEmitter
 from pubsub import pub
 import serial
 import serial.tools.list_ports
-import time
 
 import asyncio
 import json
+import time
 
 from src.plotter.domain.plotter_settings import PlotterSettings
 
@@ -24,16 +24,18 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
             return None
         try:
             response = self.arduino.readline()
-
-            while not '\n'in str(response):
+            print(str(response))
+            if response == None or len(response) < 1:
+                return None
+            while not '|'in str(response):
                 time.sleep(.001)   
                 temp = self.arduino.readline()
+                print("Response:" + str(response.decode()))
+                print("Temp:" + str(temp.decode()))
 
                 if not not temp.decode():
                     response = (response.decode()+temp.decode()).encode()
-
             response = response.decode()
-            print(response)
             processed_response = response.split(",")
             return PlotterResponse(bool(int(processed_response[0])), bool(int(processed_response[1])), PlotterPosition(int(processed_response[2]), int(processed_response[3]), 0))
         except:
@@ -69,6 +71,7 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
             text = f"KOMENDA,{command_detail.posX},{command_detail.posY},{command_detail.isHit}".encode()
             print(text)
             self.arduino.write(text)
+        #self.arduino.flush()
            
     def send_settings(self, settings: PlotterSettings):
         command = f"USTAWIENIA,{settings.speed_of_motors},{settings.speed_of_Z}".encode()
