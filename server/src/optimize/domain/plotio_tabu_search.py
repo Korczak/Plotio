@@ -47,8 +47,9 @@ class PlotioTabuSearch(Generic[T]):
             for num_of_neighbors in range(self.maximum_neighbors):
                 point_a, point_b = np.random.randint(starting_index, ending_index, size=2)
                 move = Move(solution[point_a], solution[point_b], point_a, point_b)
-                
-                new_value = self.calculate_value_after_move(solution, solution_value, move)
+                swap_indexes(solution, point_a, point_b)
+                new_value = self.calculate_value_function(solution)
+                swap_indexes(solution, point_a, point_b)
                 new_move = PossibleMove(move, new_value)
                 
                 # if(new_move in possible_moves):
@@ -96,6 +97,8 @@ class PlotioTabuSearch(Generic[T]):
                         self.best_solution = self.solution.copy()
                         self.best_score = self.solution_score
                         iter_without_optimization = 0
+                        #print(self.calculate_value_function(self.best_solution))
+                        #print(f"ZNALEZIONO LEPSZE: {self.best_score}")
                     else:
                         iter_without_optimization = iter_without_optimization + 1
                         if(max_iter_without_optimization != None and iter_without_optimization > max_iter_without_optimization):

@@ -29,4 +29,4 @@ class ProjectRepository:
         
         project = self._active_project
         
-        return OptimizeProject(project.name, project.all_commands, project.commands_to_do, project.image_content, project.labels, project.unique_labels, project.command_groups)
+        return OptimizeProject(project.name, project.all_commands, project.commands_to_do, project.image_content)

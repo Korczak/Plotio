@@ -52,7 +52,8 @@ class OptimizeProject:
             for commandGroup in commandGroups:
                 all_commands = all_commands + commandGroup.commands        
 
-        
+        self.command_groups = commandGroups
+        self.labels = labels
          
         initial_solution = [Point(point.command_detail.posX, point.command_detail.posY, point.command_detail.isHit) for point in self.all_commands]
         
@@ -65,10 +66,15 @@ class OptimizeProject:
         else:
             optimized_commands = self.all_commands
         
+        current_val = calculate_value_of_commands(self.all_commands)
+        optimized_val = calculate_value_of_commands(optimized_commands)
+        
+        print(f'Curr: {current_val}, Optimized: {optimized_val}')
+        
         return optimized_commands
     
-    def _extract_sub_images(self, img: np.ndarray, thresh_img: np.ndarray, object_color: int):
-        labels = np.zeros((img.shape[0], img.shape[1]))
+    def _extract_sub_images(self, thresh_img: np.ndarray, object_color: int):
+        labels = np.zeros((thresh_img.shape[0], thresh_img.shape[1]))
         num_of_commands = 0
         
         curr_obj = 0
@@ -76,8 +82,8 @@ class OptimizeProject:
         pixel_above, pixel_left = 0, 0
         
         
-        for x in range(0, img.shape[0]):
-            for y in range(0, img.shape[1]):
+        for x in range(0, thresh_img.shape[0]):
+            for y in range(0, thresh_img.shape[1]):
                 if(thresh_img[x, y] == object_color):
                     pixel_above, pixel_left = 0, 0
                     
@@ -104,39 +110,47 @@ class OptimizeProject:
                       
                     labels[x][y] = int(classification)
 
-        for x in range(0, img.shape[0]):
-            for y in range(0, img.shape[1]):
+        for x in range(0, thresh_img.shape[0]):
+            for y in range(0, thresh_img.shape[1]):
                 if(thresh_img[x][y] == object_color):
                     labels[x][y] = equivalency_list[int(labels[x][y])]
                     num_of_commands = num_of_commands + 1
         return equivalency_list, labels, num_of_commands
 
     def _optimize_command_groups(self, labels: ndarray, unique_labels: List[int], command_groups: List[CommandGroup], method: OptimizationMethod) -> List[Point]:
-        grouped_solution: List[GroupOfPoints] = []
+        grouped_solution: List[FragmentWithCommands] = []
         next_position: PlotterPosition = PlotterPosition(0, 0, 0)
         active_command_group = command_groups.copy()
         
         while active_command_group != None and len(active_command_group) > 0:
-            next_position, command_group_id = get_nearest_object(next_position, active_command_group)    
+            next_position, command_group_id = get_nearest_object(next_position, active_command_group, 1)    
             proposed_solution = self.get_proposed_solution(labels, labels[next_position.posY, next_position.posX])
             
-            avgPosX = sum([com.posX for com in proposed_solution]) / len(proposed_solution)
-            avgPosY = sum([com.posY for com in proposed_solution]) / len(proposed_solution)
-            grouped_solution.append(GroupOfPoints(avgPosX, avgPosY, proposed_solution))
+            if len(proposed_solution) > 1:
+                grouped_solution.append(FragmentWithCommands(proposed_solution[0].posX, proposed_solution[0].posY, proposed_solution[-1].posX, proposed_solution[-1].posY, proposed_solution))
             del active_command_group[command_group_id]
             
 
-        optimizer = PlotioTabuSearch(grouped_solution, int(math.sqrt(len(grouped_solution))), calculate_value_function=calculate_value, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=min(50, len(proposed_solution)), random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
-        optimizer.optimize(max(min(len(grouped_solution) * 20, 50*1000), 5000), None)
+        optimizer = PlotioTabuSearch(grouped_solution.copy(), int(math.sqrt(len(grouped_solution))), calculate_value_function=calculate_value_of_fragments, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=min(50, len(proposed_solution)), random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
+        optimizer.optimize(max(min(len(grouped_solution) * 20, 50*1000), 10000), None)
         optimized = optimizer.best_solution
+        
         solution: List[PointWithCommands] = []
-        print(f"Normal: {calculate_value(grouped_solution)}, Optimized: {calculate_value(optimized)}")
+        init_solution: List[PointWithCommands] = []
         for sol in optimized:
             solution = solution + sol.commands
+        for sol in grouped_solution:
+            init_solution = init_solution + sol.commands
         
         optimized_commands: List[Command] = []
         for command_group in solution:
             optimized_commands = optimized_commands + [Command(PlotterPosition(command.command_detail.posX, command.command_detail.posY, command.command_detail.isHit)) for command in command_group.commands]
+        
+        non_optimized_commands: List[Command] = []
+        for command_group in init_solution:
+            non_optimized_commands = non_optimized_commands + [Command(PlotterPosition(command.command_detail.posX, command.command_detail.posY, command.command_detail.isHit)) for command in command_group.commands]
+        
+        print(f"Normal: {calculate_value_of_commands(non_optimized_commands)}, Optimized: {calculate_value_of_commands(optimized_commands)}")
         return optimized_commands
 
     def get_proposed_solution(self, label_image: ndarray, label: int) -> List[PointWithCommands]:
@@ -183,9 +197,18 @@ class OptimizeProject:
             current_position = next_position
             proposed_solution.append(active_command_groups[command_group_id])
             del active_command_groups[command_group_id]
-                        
-        xy_value = calculate_value(proposed_solution)
-        return proposed_solution ,xy_value
+        
+        if len(proposed_solution) > 5:
+            optimizer = PlotioTabuSearch(proposed_solution.copy(), int(math.sqrt(len(proposed_solution))), calculate_value_function=calculate_value, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=min(50, len(proposed_solution)), random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
+            optimizer.optimize(max(min(len(proposed_solution) * 20, 50*1000), 2000), 50)
+            optimized = optimizer.best_solution
+
+            optim_value = calculate_value(optimized)
+            xy_value = calculate_value(proposed_solution)
+            
+            print(f"PROP: Normal: {xy_value}, Optimized: {optim_value}")
+            return optimized, optim_value
+        return proposed_solution, calculate_value(proposed_solution)
 
     def get_proposition_for_row(self, label_image, label, proposed_solution_xy, x, commands, start_index, end_index, step):
         for y in range(start_index, end_index, step):
@@ -209,7 +232,7 @@ class OptimizeProject:
         
         #tabu_optimizer = PlotioTabuSearch(extracted_groups.copy(), 30, maximum_neighbors=200, random_neighbors=True, is_first_and_last_element_static=True)
         #tabu_optimized_groups = tabu_optimizer.optimize(5000, None)
-        optimizer = SimulatedAnnealing(extracted_groups.copy(), Conditions(1000, 2, 0.1, 0.97, int(math.sqrt(len(extracted_groups))), aling.linear))
+        optimizer = SimulatedAnnealing(extracted_groups.copy(), Conditions(1000, 2, 0.1, 0.97, int(math.sqrt(len(extracted_groups))), annealing= Annealing.linear))
         optimizer.optimize()
         
         for group in extracted_groups:

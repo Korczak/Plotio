@@ -9,6 +9,21 @@ class OptimizerSettings:
         self.is_last_element_static: bool = is_last_element_static
         self.is_first_element_static : bool = is_first_element_static
 
+class FragmentWithCommands:
+    def __init__(self, posX: float, posY: float, endPosX: float, endPosY: float, commands: List[Command]) -> None:
+        self.startPosX: float = posX
+        self.startPosY: float = posY
+        self.endPosX: float = endPosX
+        self.endPosY: float = endPosY
+        self.commands: List[Command] = commands
+        
+    def __str__(self) -> str:
+        return f"[({self.startPosX}, {self.startPosY}) -> ({self.endPosX}, {self.endPosY})]"
+    
+    def __eq__(self, other: object) -> bool:
+        return self.startPosX == other.startPosX and self.startPosY == other.startPosY \
+            and self.endPosX == other.endPosX and self.endPosY == other.endPosY
+    
 class PointWithCommands:
     def __init__(self, posX: float, posY: float, commands: List[Command]) -> None:
         self.posX: float = posX
@@ -85,8 +100,8 @@ def calculate_value_after_move(solution: List[Point], solution_value: int, move:
     
     copied_solution = swap_indexes(solution, move.point_a_index, move.point_b_index)
     
-    new_value = add_point_to_solution(copied_solution, move.point_a_index, new_value, move.point_b)
-    new_value = add_point_to_solution(copied_solution, move.point_b_index, new_value, move.point_a)
+    new_value = add_point_to_solution(copied_solution, move.point_a_index, new_value, move.point_a)
+    new_value = add_point_to_solution(copied_solution, move.point_b_index, new_value, move.point_b)
     
     copied_solution = swap_indexes(solution, move.point_a_index, move.point_b_index)
     
@@ -114,6 +129,8 @@ def get_distance(point_a: Point, point_b: Point):
 
 def calculate_value(solution: List[Point], show = False):
     value = 0
+    if len(solution) == 0:
+        return 0
     current_pos = solution[0]
     
     for node in solution[1:]:
@@ -151,6 +168,24 @@ def calculate_value_of_commands(solution: List[Command], show = False):
     for node in solution[1:]:
         value = value + get_distance(current_pos, node.command_detail)
         current_pos = node.command_detail
+    
+    
+    if(show):
+        solution_text = [str(sol) for sol in solution]
+        print(f'Value of solution {solution_text} is {value}')
+    
+    return value
+
+
+def calculate_value_of_fragments(solution: List[FragmentWithCommands], show = False):
+    value = 0
+    if len(solution) == 0:
+        return 0
+    current_fragment = solution[0]
+    
+    for node in solution[1:]:
+        value = value + get_distance(Point(current_fragment.endPosX, current_fragment.endPosY), Point(node.startPosX, node.startPosY))
+        current_fragment = node
     
     
     if(show):

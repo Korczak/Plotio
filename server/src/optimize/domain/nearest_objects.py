@@ -8,15 +8,15 @@ from src.plotter.domain.command_group import CommandGroup
 from src.plotter.domain.plotter_position import PlotterPosition
 
 
-def get_nearest_object(current_position: PlotterPosition, command_groups: List[CommandGroup]):
+def get_nearest_object(current_position: PlotterPosition, command_groups: List[CommandGroup], max_num_of_neighbors: int = 200):
     next_position: PlotterPosition = None
     min_distance: int = 99999
     command_group_id: int = 0
     
     for command_id, command_group in enumerate(command_groups):
         commands = command_group.commands
-        if len(command_group.commands) > 200:
-            commands = command_group.commands[:200]
+        if len(command_group.commands) > max_num_of_neighbors:
+            commands = command_group.commands[:max_num_of_neighbors]
         possible_position = [get_distance(Point(command.command_detail.posX, command.command_detail.posY, command.command_detail.isHit), Point(current_position.posX, current_position.posY, current_position.isHit)) for command in commands]
         
         possible_position_min_id = np.argmin(possible_position)
