@@ -1,0 +1,9 @@
+@startuml
+Serwer -> Arduino: Komenda,100,100,1
+Arduino -> Serwer: 0,0,25,25
+Arduino -> Serwer: 0,0,50,50
+Arduino -> Serwer: 0,0,75,75
+Arduino -> Serwer: 0,1,100,100
+Serwer -> Arduino: Komenda,100,100,1
+...realizacja kolejnych komend...
+@enduml
