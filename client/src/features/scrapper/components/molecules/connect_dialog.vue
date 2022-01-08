@@ -60,9 +60,9 @@ export default class ConnectDialog extends Vue {
   errorMessage: string | null = "";
 
   async mounted() {
-    await getOpenPortsPlotterPlotterConnectPortsGet();
+    const ports = await getOpenPortsPlotterPlotterConnectPortsGet();
 
-    // this.ports = ports.data;
+    this.ports = ports.data;
   }
 
   async connect() {
