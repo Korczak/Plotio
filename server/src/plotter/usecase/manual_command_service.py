@@ -65,9 +65,9 @@ class ManualCommandService:
         current_position = plotter.position
 
         if(input.direction == DirectionEnum.X):
-            command = Command(position=PlotterPosition(input.position, current_position.posY, 0))
+            command = Command(PlotterPosition(input.position, current_position.posY, 0))
         elif(input.direction == DirectionEnum.Y):
-            command = Command(position=PlotterPosition(current_position.posX, input.position, 0))
+            command = Command(PlotterPosition(current_position.posX, input.position, 0))
             
         if(plotter.is_work_mode()):
             self.actual_plotter.send_command(command.command_detail)
