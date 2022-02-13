@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List, Optional
 from src.plotter.domain.command_details import CommandDetails
 from src.plotter.domain.plotter_communicator_interface import *
@@ -24,14 +25,14 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
             return None
         try:
             response = self.arduino.readline()
-            print(str(response))
+            logging.debug(f'Odp: {str(response)}')
             if response == None or len(response) < 1:
                 return None
             while not '|'in str(response):
                 time.sleep(.001)   
                 temp = self.arduino.readline()
-                print("Response:" + str(response.decode()))
-                print("Temp:" + str(temp.decode()))
+                logging.debug("Odpowiedz:" + str(response.decode()))
+                logging.debug("Temp:" + str(temp.decode()))
 
                 if not not temp.decode():
                     response = (response.decode()+temp.decode()).encode()
@@ -65,19 +66,19 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
     def send_command(self, command_detail: Any):
         if isinstance(command_detail, CommandDetails):
             text = f"{command_detail.text}".encode()
-            print(text)
-            self.arduino.write(text)
         elif isinstance(command_detail, PlotterPosition):
             text = f"KOMENDA,{command_detail.posX},{command_detail.posY},{command_detail.isHit}".encode()
-            print(text)
-            self.arduino.write(text)
+        logging.debug(f'Komenda wysłana: {text}')
+        self.arduino.write(text)
         #self.arduino.flush()
            
     def send_settings(self, settings: PlotterSettings):
         command = f"USTAWIENIA,{settings.speed_of_motors},{settings.speed_of_Z}".encode()
+        logging.debug(f'Komenda wysłana: {command}')
         self.arduino.write(command)
         
     def positioning(self):
         command = "POZYCJONOWANIE".encode()
+        logging.debug(f'Komenda wysłana: {command}')
         self.arduino.write(command)
 

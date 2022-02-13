@@ -1,3 +1,4 @@
+import logging
 from typing import List
 from fastapi import APIRouter
 from config.container import *
@@ -5,6 +6,7 @@ from dependency_injector.wiring import  inject
 
 from config.shared import dependency
 from src.plotter.domain.plotter_settings import PlotterSettings
+from src.plotter.usecase import project_save_service
 from src.plotter.usecase.alarm_service import AlarmResponse, AlarmService
 from src.plotter.usecase.alert_service import AlertResponse, AlertService
 from src.plotter.usecase.connect_service import ConnectService, ConnectionSettingsInput, ConnectionSettingsResponse
@@ -44,6 +46,16 @@ async def get_project_image(service: RenderSimulationService = dependency(Contai
     image_content = service.get_image_with_processed_commands()
     return image_content
 
+@router.post("/project/restore")
+@inject
+async def restore_project(service: project_save_service.ProjectSaveService = dependency(Container.plotter.project_save_service)):
+    service.restore_project_from_file()
+    
+@router.post("/project/save-to-file")
+@inject
+async def save_project(service: project_save_service.ProjectSaveService = dependency(Container.plotter.project_save_service)):
+    service.save_project()
+    
 @router.post("/project/start")
 @inject
 async def start_project(service: ProjectService = dependency(Container.plotter.project_service)):

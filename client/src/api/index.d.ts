@@ -18,6 +18,18 @@ type GetProjectImagePlotterProjectCurrentProcessedImageGetResult0 = RequestResul
 */
 export function getProjectImagePlotterProjectCurrentProcessedImageGet(): GetProjectImagePlotterProjectCurrentProcessedImageGetResult0;
 
+type RestoreProjectPlotterProjectRestorePostResult0 = RequestResult<object>;
+/**
+* Restore Project
+*/
+export function restoreProjectPlotterProjectRestorePost(): RestoreProjectPlotterProjectRestorePostResult0;
+
+type SaveProjectPlotterProjectSaveToFilePostResult0 = RequestResult<object>;
+/**
+* Save Project
+*/
+export function saveProjectPlotterProjectSaveToFilePost(): SaveProjectPlotterProjectSaveToFilePostResult0;
+
 type StartProjectPlotterProjectStartPostResult0 = RequestResult<object>;
 /**
 * Start Project

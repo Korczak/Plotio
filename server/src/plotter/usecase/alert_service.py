@@ -35,6 +35,7 @@ class AlertService:
         pub.subscribe(self.project_stopped, EventsName.ProjectStopped)
         pub.subscribe(self.project_started, EventsName.ProjectStarted)
         pub.subscribe(self.project_resumed, EventsName.ProjectResumed)
+        pub.subscribe(self.project_restored, EventsName.ProjectRestored)
 
     def project_completed(self):
         self.alert_repository.add_alert(Alert("Ukończono projekt", AlertType.Success))
@@ -46,6 +47,8 @@ class AlertService:
         self.alert_repository.add_alert(Alert("Rozpoczęto projekt", AlertType.Success))
     def project_resumed(self):
         self.alert_repository.add_alert(Alert("Wznowiono projekt", AlertType.Success))
+    def project_restored(self):
+        self.alert_repository.add_alert(Alert("Załadowano projekt z pliku", AlertType.Success))
         
         
 def convert_to_enum(type: AlertType) -> AlertModelEnum:

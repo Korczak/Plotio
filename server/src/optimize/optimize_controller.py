@@ -22,4 +22,4 @@ router = APIRouter(
 @router.post("/optimize/project/actual")
 @inject
 async def optimize_project(service: OptimizePathService = dependency(Container.optimize.optimize_path_service)):
-    await service.optimize_command_group_path(OptimizationMethod.TabuSearch)
+    await service.optimize_command_group_path(OptimizationMethod.SimulatedAnnealing)

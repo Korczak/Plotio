@@ -16,6 +16,7 @@ from src.optimize.usecase.optimize_path_service import OptimizePathService
 from src.plotter.usecase.plotter_position_service import PlotterPositionService
 from src.plotter.usecase.plotter_settings_service import PlotterSettingsService
 from src.plotter.usecase.progress_info_service import ProgressInfoService
+from src.plotter.usecase.project_save_service import ProjectSaveService
 from src.plotter.usecase.project_service import ProjectService
 from src.plotter.usecase.render_simaluation_service import RenderSimulationService
 from src.plotter.infrastructure.plotter_repository import PlotterRepository
@@ -37,6 +38,7 @@ class PlotterModule(containers.DeclarativeContainer):
     render_simulation_service = providers.Singleton(RenderSimulationService, plotter_repository=plotter_repository, project_repository=project_repository)
     plotter_mode_service = providers.Singleton(PlotterModeService, plotter_repository=plotter_repository)
     project_service = providers.Singleton(ProjectService, plotter_repository=plotter_repository, project_repository = project_repository, alert_repository=alert_repository)
+    project_save_service = providers.Singleton(ProjectSaveService, plotter_repository=plotter_repository, project_repository = project_repository)
     alert_service = providers.Singleton(AlertService, alert_repository=alert_repository)    
     progress_info_service = providers.Singleton(ProgressInfoService, plotter_repository=plotter_repository)
     alarm_service = providers.Singleton(AlarmService, alarm_repository=alarm_repository, plotter_repository = plotter_repository)

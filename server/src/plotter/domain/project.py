@@ -1,4 +1,5 @@
 import enum
+import json
 from typing import List, Optional
 
 from numpy import ndarray
@@ -6,6 +7,8 @@ from numpy.core.fromnumeric import argmin
 from numpy.lib.function_base import delete
 from numpy.random.mtrand import f
 from pubsub import pub
+from sqlalchemy import true
+from tomlkit import string
 from src.events.events_name import EventsName
 from src.optimize.domain.opimization_utils import *
 from src.plotter.domain.command import Command
@@ -96,10 +99,29 @@ class Project:
         self.commands_to_do.pop(0)
         if len(self.commands_to_do) == 0:
             self.complete_project()
+        self.save_to_file()
         
     def optimize_command_groups(self, optimized_commands: List[Command[PlotterPosition]]):               
         self.all_commands = optimized_commands
         self.commands_to_do = optimized_commands
         self.status = ProjectStatus.Ready
-        
 
+    def to_json(self):
+        return {
+            "name": self.name,
+            "all_commands": len(self.all_commands),
+            "commands_to_do": len(self.commands_to_do),
+            "commands_done": len(self.all_commands) - len(self.commands_to_do)
+        }
+        
+    def complete_commands(self, num_of_completed_commands: int):
+        for i in range(num_of_completed_commands):
+            command = self.commands_to_do[0]
+            command.complete_command()
+            self.commands_to_do.pop(0)
+            self.image_with_processed_commands[command.command_detail.posY, command.command_detail.posX] = 125
+
+    def save_to_file(self):      
+        with open("aktualny_project.json", "w") as writer:
+            content = self.to_json()
+            json.dump(content, writer);

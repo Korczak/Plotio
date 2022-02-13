@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from pubsub import pub
 from src import plotter
+from src.events.events_name import EventsName
 from src.plotter.domain.alarm import Alarm, AlarmType
 from src.plotter.domain.command import Command
 from src.plotter.domain.command_details import CommandDetails
@@ -80,6 +81,11 @@ class Plotter:
         if(self.project is not None):
             self.project.stop_project()
         self.project = project
+
+    def restore_project(self, num_of_commands):
+        if(self.project is not None):
+            self.project.complete_commands(num_of_commands)
+            pub.sendMessage(EventsName.ProjectRestored)        
 
     def connect(self):
         self.status = PlotterStatus.Connected

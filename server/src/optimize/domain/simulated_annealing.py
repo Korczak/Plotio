@@ -34,7 +34,7 @@ def logarithmic_annealing(T: float, epoch: float):
 
 
 class SimulatedAnnealing:
-    def __init__(self, initial_solution: List[Point], conditions: Conditions, optimizer_settings: OptimizerSettings, calculate_value_function: Any =calculate_value, calculate_value_after_move: Any =calculate_value_after_move, maximum_neighbors: int = None, random_neighbors: bool = False) -> None:
+    def __init__(self, initial_solution: List[Point], conditions: Conditions, optimizer_settings: OptimizerSettings, calculate_value_function: Any =calculate_value, calculate_value_after_move: Any =calculate_value_after_move) -> None:
         self.solution: List[Point] = initial_solution.copy()
         self.solution_score: int = calculate_value_function(self.solution)
         self.best_solution: List[Point] = initial_solution.copy()

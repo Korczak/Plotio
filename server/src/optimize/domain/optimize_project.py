@@ -59,13 +59,11 @@ class OptimizeProject:
         
         optimized_commands = None
         
-        if(method == OptimizationMethod.TabuSearch):
-            optimized_commands = self._optimize_command_groups(self.labels, self.unique_labels, self.command_groups, method)
-        elif(method == OptimizationMethod.SimulatedAnnealing):
-            optimized_commands = self._optimize_with_simulated_annealing(initial_solution)
-        else:
+        if(method == OptimizationMethod.DoNotOptimize):
             optimized_commands = self.all_commands
-        
+        else:
+            optimized_commands = self._optimize_command_groups(self.labels, self.unique_labels, self.command_groups, method)
+            
         current_val = calculate_value_of_commands(self.all_commands)
         optimized_val = calculate_value_of_commands(optimized_commands)
         
@@ -131,9 +129,15 @@ class OptimizeProject:
             del active_command_group[command_group_id]
             
 
-        optimizer = PlotioTabuSearch(grouped_solution.copy(), int(math.sqrt(len(grouped_solution))), calculate_value_function=calculate_value_of_fragments, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=min(50, len(proposed_solution)), random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
-        optimizer.optimize(max(min(len(grouped_solution) * 20, 50*1000), 10000), None)
-        optimized = optimizer.best_solution
+        if method == OptimizationMethod.TabuSearch:
+            optimizer = PlotioTabuSearch(grouped_solution.copy(), int(math.sqrt(len(grouped_solution))), calculate_value_function=calculate_value_of_fragments, calculate_value_after_move=calculate_value_after_move, maximum_neighbors=min(50, len(proposed_solution)), random_neighbors=True, optimizer_settings=OptimizerSettings(True, False))
+            optimizer.optimize(max(min(len(grouped_solution) * 20, 50*1000), 10000), None)
+            optimized = optimizer.best_solution
+        elif method == OptimizationMethod.SimulatedAnnealing:
+            optimizer = SimulatedAnnealing(grouped_solution.copy(), Conditions(100, 0.1, 0.1, 0.97, 100, Annealing.linear),  calculate_value_function=calculate_value_of_fragments, calculate_value_after_move=calculate_value_after_move, optimizer_settings=OptimizerSettings(True, False))
+            optimizer.optimize()
+            optimized = optimizer.best_solution
+
         
         solution: List[PointWithCommands] = []
         init_solution: List[PointWithCommands] = []

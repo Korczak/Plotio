@@ -18,6 +18,12 @@ class ProjectRepository:
 
         self._project_db.append(projectDto)
         self._active_project = projectDto
+        
+    def add_project(self, project: Project) -> None:
+        projectDto = ProjectDto(project.name, project.is_active, project.status, project.all_commands, project.commands_to_do, project.image_content, project.image_with_processed_commands, project.image_shape)
+
+        self._project_db.append(projectDto)
+        self._active_project = projectDto
 
     def update_project(self, project: Project):
         projectDto = ProjectDto(project.name, project.is_active, project.status, project.all_commands, project.commands_to_do, project.image_content, project.image_with_processed_commands, project.image_shape)

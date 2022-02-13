@@ -12,6 +12,14 @@ export function getProjectImagePlotterProjectCurrentProcessedImageGet() {
   return request("get", `/plotter/project/current/processed-image`, { "header": { "Content-Type": "application/json", }, })();
 }
 
+export function restoreProjectPlotterProjectRestorePost() {
+  return request("post", `/plotter/project/restore`, { "header": { "Content-Type": "application/json", }, })();
+}
+
+export function saveProjectPlotterProjectSaveToFilePost() {
+  return request("post", `/plotter/project/save-to-file`, { "header": { "Content-Type": "application/json", }, })();
+}
+
 export function startProjectPlotterProjectStartPost() {
   return request("post", `/plotter/project/start`, { "header": { "Content-Type": "application/json", }, })();
 }

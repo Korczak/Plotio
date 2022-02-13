@@ -1,5 +1,6 @@
 class EventsName:
     ProjectAdded="ProjectAdded"
+    ProjectRestored = "ProjectRestored"
     ProjectStarted="ProjectStarted"
     ProjectStopped="ProjectStopped"
     ProjectPaused="ProjectPaused"
