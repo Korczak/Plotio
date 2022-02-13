@@ -1,5 +1,5 @@
 import Vue from "vue";
-import { PlotterModule } from "./features/scrapper/plotter-module";
+import { PlotterModule } from "./features/plotter/plotter-module";
 import { RouterModule } from "@/plugins/router";
 import { StoreModule } from "./plugins/store";
 import { CoreModule } from "./plugins/core";

@@ -9,6 +9,7 @@
         <loading-in-progress title="Optymalizuje..."></loading-in-progress>
       </template>
       <v-btn @click="optimize()">Optymalizuj obrazek</v-btn>
+      <save-restore-project-buttons></save-restore-project-buttons>
     </card-dialog>
   </div>
 </template>
@@ -16,8 +17,9 @@
 <script lang="ts">
 import { optimizeProjectOptimizeOptimizeProjectActualPost } from "@/api";
 import { Component, VModel, Vue } from "vue-property-decorator";
+import SaveRestoreProjectButtons from "../molecules/save_restore_project_buttons.vue";
 
-@Component({ components: {} })
+@Component({ components: { SaveRestoreProjectButtons } })
 export default class GraphicsEditor extends Vue {
   @VModel({ type: Boolean }) dialog: boolean | undefined;
 
