@@ -3,33 +3,52 @@
     <card-dialog
       v-model="dialog"
       title="Edytor grafik"
-      :persistent="optimizationInProgress"
+      width="100%"
+      max-width="100%"
+      persistent
     >
-      <template v-slot:card v-if="optimizationInProgress">
-        <loading-in-progress title="Optymalizuje..."></loading-in-progress>
+      <v-row>
+        <v-col class="mt-3" cols="4">
+          <image-settings @onChange="onChange"></image-settings>
+        </v-col>
+        <v-col cols="8">
+          <image-preview
+            ref="image-preview"
+            width="600px"
+            height="400px"
+          ></image-preview>
+        </v-col>
+      </v-row>
+      <template v-slot:actions>
+        <v-spacer></v-spacer>
+        <v-btn color="success" @click="save">Zatwierdź</v-btn>
       </template>
-      <v-btn @click="optimize()">Optymalizuj obrazek</v-btn>
-      <save-restore-project-buttons></save-restore-project-buttons>
     </card-dialog>
   </div>
 </template>
 
 <script lang="ts">
-import { optimizeProjectOptimizeOptimizeProjectActualPost } from "@/api";
 import { Component, VModel, Vue } from "vue-property-decorator";
 import SaveRestoreProjectButtons from "../molecules/save_restore_project_buttons.vue";
+import ImageSettings from "../molecules/image_settings.vue";
+import { approveImageImageApproveImagePost } from "@/api";
+import ImagePreview from "../molecules/image_preview.vue";
 
-@Component({ components: { SaveRestoreProjectButtons } })
+@Component({
+  components: { SaveRestoreProjectButtons, ImageSettings, ImagePreview },
+})
 export default class GraphicsEditor extends Vue {
   @VModel({ type: Boolean }) dialog: boolean | undefined;
 
-  optimizationInProgress: boolean = false;
-
-  async optimize() {
-    this.optimizationInProgress = true;
-    await optimizeProjectOptimizeOptimizeProjectActualPost();
-    this.optimizationInProgress = false;
+  async save() {
+    await approveImageImageApproveImagePost();
     this.dialog = false;
+  }
+
+  onChange() {
+    const imagePreview = this.$refs["image-preview"] as ImagePreview;
+
+    imagePreview.reloadImage();
   }
 }
 </script>

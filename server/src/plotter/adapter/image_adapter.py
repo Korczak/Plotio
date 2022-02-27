@@ -24,30 +24,28 @@ class ImageAdapter:
         pub.subscribe(self.on_add_image, EventsName.ImageAdded)
 
     def on_add_image(self, arg1: ImageAdded):
-        b64 = urlsafe_b64decode(str(arg1.content)); 
-        npimg = np.fromstring(b64, dtype=np.uint8); 
-        img = cv2.imdecode(npimg, 0)
-        threshold = 128
+        img = arg1.content
         
-        ret, thresh_img = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY)
-        
-        object_color = 0
+        max_color = 0;
+        for x in range(0, img.shape[0]):    
+            for y in range(0, img.shape[1]):
+                max_color = max(max_color, img[x, y])
+                
         all_commands: List[Command] = []
         for x in range(0, img.shape[0]):
             if x % 2 == 0:
                 for y in range(0, img.shape[1]):
-                    if(thresh_img[x, y] == object_color):
-                        all_commands.append(Command(PlotterPosition(y, x, 1)))
+                    if(img[x, y] != max_color):
+                        all_commands.append(Command(PlotterPosition(y, x, max_color - img[x, y])))
             else:
                 for y in range(img.shape[1] - 1, 0, -1):
-                    if(thresh_img[x, y] == object_color):
-                        all_commands.append(Command(PlotterPosition(y, x, 1)))
+                    if(img[x, y] != max_color):
+                        all_commands.append(Command(PlotterPosition(y, x, max_color - img[x, y])))
   
             
             
         plotter = self.plotter_repository.get_plotter()
-        plotter.add_project(Project(arg1.name, True, ProjectStatus.Ready, all_commands, all_commands, thresh_img, thresh_img, img.shape))
+        plotter.add_project(Project(arg1.name, True, ProjectStatus.Ready, all_commands, all_commands, img, img, img.shape))
         self.plotter_repository.update_plotter(plotter)            
-        optimize_project = OptimizeProject(arg1.name, all_commands, all_commands, thresh_img)
+        optimize_project = OptimizeProject(arg1.name, all_commands, all_commands, img)
         pub.sendMessage(EventsName.ProjectAdded, arg1=optimize_project)
-        

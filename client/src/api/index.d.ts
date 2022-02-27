@@ -168,6 +168,25 @@ type AddImageImageAddImagePostResult0 = RequestResult<object>;
 */
 export function addImageImageAddImagePost(params: AddImageImageAddImagePostParams0): AddImageImageAddImagePostResult0;
 
+type EditImageImageEditImagePostParams0 = { "body"?: { "shadow": number; "contrast": number; "brightness": number; "sharpness": number; "highlights": number; "exposition": number; "ditherAlgorithm": "Brak" | "Floyd-Steinberg" | "False Floyd-Steinberg" | "Stucki" | "Sierra" | "Sierra lite" | "Sierra 2-rows" | "Threshold" | "Threshold 2-rows"; "histogramType": "Brak" | "Equalization" | "CLAHE"; "threshold": number; "threshold2Row": { "threshold_1": number; "threshold_2": number; }; }; };
+type EditImageImageEditImagePostResult0 = RequestResult<object>;
+/**
+* Edit Image
+*/
+export function editImageImageEditImagePost(params: EditImageImageEditImagePostParams0): EditImageImageEditImagePostResult0;
+
+type ApproveImageImageApproveImagePostResult0 = RequestResult<object>;
+/**
+* Approve Image
+*/
+export function approveImageImageApproveImagePost(): ApproveImageImageApproveImagePostResult0;
+
+type GetImagePreviewImagePreviewGetResult0 = RequestResult<object>;
+/**
+* Get Image Preview
+*/
+export function getImagePreviewImagePreviewGet(): GetImagePreviewImagePreviewGetResult0;
+
 type OptimizeProjectOptimizeOptimizeProjectActualPostResult0 = RequestResult<object>;
 /**
 * Optimize Project

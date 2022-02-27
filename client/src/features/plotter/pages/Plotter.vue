@@ -1,6 +1,7 @@
 <template>
   <div>
     <import-image :dialog.sync="isImageImport"></import-image>
+    <settings-dialog v-model="isSettings"></settings-dialog>
     <graphics-editor v-model="isGraphicEditor"></graphics-editor>
     <v-container fluid class="py-0">
       <v-row class="mt-2">
@@ -10,6 +11,7 @@
               <plotter-menu
                 @onImport="isImageImport = true"
                 @onGraphicsEditor="isGraphicEditor = true"
+                @onSettings="isSettings = true"
               ></plotter-menu>
             </v-col>
             <v-col cols="4" class="py-0">
@@ -60,6 +62,7 @@ import ImportImage from "../components/organisms/import_image.vue";
 import StatusBar from "../components/organisms/status_bar.vue";
 import AlarmDialog from "../components/molecules/alarm_dialog.vue";
 import GraphicsEditor from "../components/organisms/graphics_editor.vue";
+import SettingsDialog from "../components/organisms/settings_dialog.vue";
 //import { rootGet } from "@/api/index";
 
 @Component({
@@ -74,12 +77,14 @@ import GraphicsEditor from "../components/organisms/graphics_editor.vue";
     StatusBar,
     AlarmDialog,
     GraphicsEditor,
+    SettingsDialog,
   },
 })
 export default class Plotter extends Vue {
   message: string = "";
   isImageImport = false;
   isGraphicEditor: boolean = false;
+  isSettings: boolean = false;
 
   created() {
     console.log(this.$socket);
