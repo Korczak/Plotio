@@ -67,7 +67,8 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         if isinstance(command_detail, CommandDetails):
             text = f"{command_detail.text}".encode()
         elif isinstance(command_detail, PlotterPosition):
-            text = f"KOMENDA,{command_detail.posX},{command_detail.posY},{command_detail.hitCount}".encode()
+            hitOnce = 1 if command_detail.hitCount > 0 else 0
+            text = f"KOMENDA,{command_detail.posX},{command_detail.posY},{hitOnce}".encode()
         logging.debug(f'Komenda wysłana: {text}')
         self.arduino.write(text)
         #self.arduino.flush()
