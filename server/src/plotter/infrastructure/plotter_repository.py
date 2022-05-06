@@ -23,7 +23,7 @@ class PlotterRepository:
         project = self.project_repository.get_active_project()
         return Plotter(
             self._plotter_db.status, 
-            PlotterPosition(self._plotter_db.posX, self._plotter_db.posY, self._plotter_db.hitCount), 
+            PlotterPosition(self._plotter_db.posX, self._plotter_db.posY, self._plotter_db.isHit), 
             self._plotter_db.plotterMode, 
             self._plotter_db.workMode,
             project,

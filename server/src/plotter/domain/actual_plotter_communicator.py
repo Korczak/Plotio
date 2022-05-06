@@ -25,13 +25,16 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
             return None
         try:
             response = self.arduino.readline()
+            print(f'Odp: {str(response)}')
             logging.debug(f'Odp: {str(response)}')
             if response == None or len(response) < 1:
                 return None
             while not '|'in str(response):
                 time.sleep(.001)   
                 temp = self.arduino.readline()
+                print("Odpowiedz:" + str(response.decode()))
                 logging.debug("Odpowiedz:" + str(response.decode()))
+                print("Temp:" + str(temp.decode()))
                 logging.debug("Temp:" + str(temp.decode()))
 
                 if not not temp.decode():
@@ -39,8 +42,10 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
             response = response.decode()
             processed_response = response.split(",")
             return PlotterResponse(bool(int(processed_response[0])), bool(int(processed_response[1])), PlotterPosition(int(processed_response[2]), int(processed_response[3]), 0))
-        except:
-        	return None
+        except Exception as inst:
+            logging.error("Problem z odczytaniem z serial")
+            logging.error(inst)
+            return None
         return None
 
     def connect(self, connection_settings: ConnectionSettings) -> bool:
@@ -49,6 +54,9 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         self.connection_settings: ConnectionSettings = connection_settings
         
         if(self.is_connected()):
+            self.arduino.write(f"POBIERZ".encode())
+            print(f"Komenda wysłana: POBIERZ")
+            logging.debug(f"Komenda wysłana: POBIERZ")
             return True
             
         return False
@@ -67,19 +75,19 @@ class ActualPlotterCommunicator(PlotterCommunicatorInterface):
         if isinstance(command_detail, CommandDetails):
             text = f"{command_detail.text}".encode()
         elif isinstance(command_detail, PlotterPosition):
-            hitOnce = 1 if command_detail.hitCount > 0 else 0
-            text = f"KOMENDA,{command_detail.posX},{command_detail.posY},{hitOnce}".encode()
+            text = f"KOMENDA,{command_detail.posX},{command_detail.posY},{command_detail.isHit}".encode()
+        print(f'Komenda wysłana: {text}')
         logging.debug(f'Komenda wysłana: {text}')
         self.arduino.write(text)
         #self.arduino.flush()
            
     def send_settings(self, settings: PlotterSettings):
-        command = f"USTAWIENIA,{settings.speed_of_motors},{settings.speed_of_Z}".encode()
-        logging.debug(f'Komenda wysłana: {command}')
+        command = f"USTAWIENIA,{settings.speed_of_motors},{settings.hit_count},{settings.pixel_density}".encode()
+        print(f'Komenda wysłana: {command}')
         self.arduino.write(command)
         
     def positioning(self):
         command = "POZYCJONOWANIE".encode()
-        logging.debug(f'Komenda wysłana: {command}')
+        print(f'Komenda wysłana: {command}')
         self.arduino.write(command)
 

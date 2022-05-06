@@ -3,9 +3,6 @@ from src.image.usecase.add_image_service import AddImageService
 from src.image.infrastructure.image_repository import ImageRepository
 from dependency_injector import containers, providers
 
-from src.image.usecase.edit_image_service import EditImageService
-from src.image.usecase.image_preview_service import ImagePreviewService
-
 
 class ImageModule(containers.DeclarativeContainer):
 
@@ -27,15 +24,4 @@ class ImageModule(containers.DeclarativeContainer):
         AddImageService, 
         repository=image_repository
     )
-    
-    edit_image_service = providers.Singleton(
-        EditImageService, 
-        repository=image_repository
-    )
-    
-    image_preview_service = providers.Singleton(
-        ImagePreviewService, 
-        repository=image_repository
-    )
-    
     

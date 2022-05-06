@@ -35,6 +35,7 @@
         ></loading-in-progress>
       </v-card>
     </v-dialog>
+    <error-snackbar v-model="error" :text="errorMessage"></error-snackbar>
   </div>
 </template>
 
@@ -50,6 +51,8 @@ export default class ImportImage extends Vue {
   fileSource: any = null;
   isFileLoaded: boolean = false;
   importingFile: boolean = false;
+  error: boolean = false;
+  errorMessage: string = "";
 
   @Watch("file")
   onFileChanged() {
@@ -61,15 +64,28 @@ export default class ImportImage extends Vue {
     if ((this.$refs["form"] as any).validate() == false) return;
     this.importingFile = true;
     let fileContent = await this.getBase64(this.file);
-    await addImageImageAddImagePost({
+    const result = await addImageImageAddImagePost({
       body: {
         name: this.file?.name!,
         content: fileContent as string,
       },
     });
 
-    this.dialogSync = false;
     this.importingFile = false;
+    if(result.data == "Added") {
+      this.dialogSync = false;
+    }
+    else if(result.data == "ImageNotBinaryError") {
+      this.error = true;
+      this.errorMessage = "Image must be binary!";
+    }
+    else if(result.data == "ImageTooBigError") {
+      this.error = true;
+      this.errorMessage = "Image is too big";
+    }
+
+
+
   }
 
   getBase64(file: any) {

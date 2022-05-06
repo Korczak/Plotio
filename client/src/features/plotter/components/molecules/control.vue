@@ -1,16 +1,14 @@
 <template>
   <div>
-    <v-card>
-      <v-btn class="my-3 ma-2" small @click="startProject()">
-        <v-icon>mdi-play</v-icon>
-      </v-btn>
-      <v-btn class="ma-2" small @click="pauseProject()">
-        <v-icon>mdi-pause</v-icon>
-      </v-btn>
-      <v-btn class="ma-2" small @click="stopProject()">
-        <v-icon>mdi-stop</v-icon>
-      </v-btn>
-    </v-card>
+    <v-btn class="my-3" @click="startProject()">
+      <v-icon>mdi-play</v-icon>
+    </v-btn>
+    <v-btn class="ml-1" @click="pauseProject()">
+      <v-icon>mdi-pause</v-icon>
+    </v-btn>
+    <v-btn class="ml-1" @click="stopProject()">
+      <v-icon>mdi-stop</v-icon>
+    </v-btn>
   </div>
 </template>
 

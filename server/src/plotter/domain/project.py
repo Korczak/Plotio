@@ -33,22 +33,29 @@ class ProjectStatus(enum.Enum):
     Completed = 'Completed'
 
 class Project:
-    def __init__(self, name: str, commands: List[Command]) -> None:
-        self.name = name
+    def __init__(self, name: str, commands: List[Command], totalDistance:int) -> None:
+        self.name = name 
+        self.totalDistance = totalDistance
+        self.distanceCompleted = 0
         self.status: ProjectStatus = ProjectStatus.NotStarted
         self.all_commands: List[Command] = commands.copy()
         self.commands_to_do: List[Command] = []
         self.is_active = True
         self.image_content: ndarray = None
 
-    def __init__(self, name: str, is_active: bool, status: ProjectStatus, all_commands: List[Command], commands_to_do: List[Command], image_content: ndarray, image_with_processed_commands: ndarray, image_shape: List[int]) -> None:
+    def __init__(self, name: str, is_active: bool, status: ProjectStatus, all_commands: List[Command], commands_to_do: List[Command], previous_command: Command, image_content: ndarray, image_with_processed_commands: ndarray, image_shape: List[int], totalDistance:int, distanceCompleted: int) -> None:
         self.name = name
+        self.totalDistance = totalDistance
+        self.distanceCompleted = distanceCompleted
+        self.previous_command: Command = previous_command
         self.is_active: bool = is_active
         self.status: ProjectStatus = status
         self.all_commands: List[Command] = all_commands.copy()
         self.commands_to_do: List[Command] = commands_to_do.copy()
-        self.image_content: ndarray = image_content.copy()
-        self.image_with_processed_commands: ndarray = image_with_processed_commands.copy()
+        #self.image_content: ndarray = image_content.copy()
+        #self.image_with_processed_commands: ndarray = image_with_processed_commands.copy()
+        self.image_content: ndarray = image_content
+        self.image_with_processed_commands: ndarray = image_with_processed_commands
         self.image_shape: List[int] = image_shape
 
     def load_image(self, image_content: str):
@@ -94,13 +101,24 @@ class Project:
         self.commands_to_do[0].send_command()
 
     def complete_current_command(self) -> None:
+        if(self.previous_command is not None):
+            dist = max(abs(self.previous_command.command_detail.posX-self.commands_to_do[0].command_detail.posX), abs(self.previous_command.command_detail.posY - self.commands_to_do[0].command_detail.posY))
+            self.distanceCompleted = self.distanceCompleted + dist
+
         self.image_with_processed_commands[self.commands_to_do[0].command_detail.posY, self.commands_to_do[0].command_detail.posX] = 125
+        self.previous_command = self.commands_to_do[0]
         self.commands_to_do[0].complete_command()
         self.commands_to_do.pop(0)
         if len(self.commands_to_do) == 0:
             self.complete_project()
         self.save_to_file()
         
+    def get_distance_to_complete(self):
+        return self.totalDistance - self.distanceCompleted
+
+    def get_commands_count(self):
+        return len(self.commands_to_do)
+
     def optimize_command_groups(self, optimized_commands: List[Command[PlotterPosition]]):               
         self.all_commands = optimized_commands
         self.commands_to_do = optimized_commands

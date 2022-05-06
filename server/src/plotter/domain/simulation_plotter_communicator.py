@@ -40,8 +40,8 @@ class SimulationPlotterCommunicator(PlotterCommunicatorInterface):
             command_done = True
         
         alarm_status = False
-        if(self.position.posX > self.max_width or self.position.posX < 0 or self.position.posY > self.max_height or self.position.posY < 0):
-            alarm_status = True
+#        if(self.position.posX > self.max_width or self.position.posX < 0 or self.position.posY > self.max_height or self.position.posY < 0):
+#            alarm_status = True
         
         return PlotterResponse(alarm_status, command_done, self.position)
 
@@ -52,6 +52,7 @@ class SimulationPlotterCommunicator(PlotterCommunicatorInterface):
         return True
     
     def send_command(self, command_detail: Any):
+        print("SEND COMMAND SIMULATION")
         if isinstance(command_detail, CommandDetails):
             if(command_detail.text == "RESET"):
                 self.desired_position = PlotterPosition(0, 0, 0)

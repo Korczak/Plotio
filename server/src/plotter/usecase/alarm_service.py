@@ -47,3 +47,5 @@ class AlarmService:
         if(plotter.is_alarm_active() == False):
             plotter.set_alarm(arg1)
             self.plotter_repository.update_plotter(plotter)
+
+        del plotter

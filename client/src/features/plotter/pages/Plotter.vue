@@ -1,34 +1,42 @@
 <template>
   <div>
     <import-image :dialog.sync="isImageImport"></import-image>
-    <settings-dialog v-model="isSettings"></settings-dialog>
     <graphics-editor v-model="isGraphicEditor"></graphics-editor>
     <v-container fluid class="py-0">
       <v-row class="mt-2">
         <v-col cols="7">
           <v-row>
-            <v-col cols="8" class="py-0">
-              <plotter-menu
-                @onImport="isImageImport = true"
-                @onGraphicsEditor="isGraphicEditor = true"
-                @onSettings="isSettings = true"
-              ></plotter-menu>
+            <v-col cols="6">
+              <v-row>
+                <v-col cols="12">
+                  <plotter-menu
+                    @onImport="isImageImport = true"
+                    @onGraphicsEditor="isGraphicEditor = true"
+                  ></plotter-menu>
+                </v-col>
+              </v-row>
+              <v-row class="pt-2">
+                <v-col cols="12">
+                  <manual-steering></manual-steering>
+                </v-col>
+              </v-row>
             </v-col>
-            <v-col cols="4" class="py-0">
-              <control></control>
+            <v-col cols="6" class="py-0 px-1">
+              <v-row>
+                <v-col cols="12">
+                  <plotter-mode></plotter-mode>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12">
+                  <coordinates></coordinates>
+                </v-col>
+              </v-row>
             </v-col>
           </v-row>
-          <v-row class="mt-3">
-            <v-col cols="6" class="">
-              <plotter-mode></plotter-mode>
-            </v-col>
-            <v-col cols="6" class="">
-              <coordinates></coordinates>
-            </v-col>
-          </v-row>
-          <v-row class="mt-2">
+          <v-row>
             <v-col cols="12">
-              <manual-steering></manual-steering>
+              <status-bar></status-bar>
             </v-col>
           </v-row>
         </v-col>
@@ -38,11 +46,6 @@
             :width="simulationWidth"
             :height="simulationHeight"
           ></simulation>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" class="pa-0">
-          <status-bar></status-bar>
         </v-col>
       </v-row>
     </v-container>
@@ -62,7 +65,8 @@ import ImportImage from "../components/organisms/import_image.vue";
 import StatusBar from "../components/organisms/status_bar.vue";
 import AlarmDialog from "../components/molecules/alarm_dialog.vue";
 import GraphicsEditor from "../components/organisms/graphics_editor.vue";
-import SettingsDialog from "../components/organisms/settings_dialog.vue";
+import ProcessBar from "../components/molecules/process_bar.vue";
+
 //import { rootGet } from "@/api/index";
 
 @Component({
@@ -77,14 +81,13 @@ import SettingsDialog from "../components/organisms/settings_dialog.vue";
     StatusBar,
     AlarmDialog,
     GraphicsEditor,
-    SettingsDialog,
+    ProcessBar,
   },
 })
 export default class Plotter extends Vue {
   message: string = "";
   isImageImport = false;
   isGraphicEditor: boolean = false;
-  isSettings: boolean = false;
 
   created() {
     console.log(this.$socket);

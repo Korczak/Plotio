@@ -24,28 +24,38 @@ class ImageAdapter:
         pub.subscribe(self.on_add_image, EventsName.ImageAdded)
 
     def on_add_image(self, arg1: ImageAdded):
-        img = arg1.content
+        b64 = urlsafe_b64decode(str(arg1.content)); 
+        npimg = np.fromstring(b64, dtype=np.uint8); 
+        img = cv2.imdecode(npimg, 0)
+        threshold = 128
         
-        max_color = 0;
-        for x in range(0, img.shape[0]):    
-            for y in range(0, img.shape[1]):
-                max_color = max(max_color, img[x, y])
-                
+        ret, thresh_img = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY)
+        
+        object_color = 0
         all_commands: List[Command] = []
         for x in range(0, img.shape[0]):
             if x % 2 == 0:
                 for y in range(0, img.shape[1]):
-                    if(img[x, y] != max_color):
-                        all_commands.append(Command(PlotterPosition(y, x, max_color - img[x, y])))
+                    if(thresh_img[x, y] == object_color):
+                        all_commands.append(Command(PlotterPosition(y, x, 1)))
             else:
                 for y in range(img.shape[1] - 1, 0, -1):
-                    if(img[x, y] != max_color):
-                        all_commands.append(Command(PlotterPosition(y, x, max_color - img[x, y])))
+                    if(thresh_img[x, y] == object_color):
+                        all_commands.append(Command(PlotterPosition(y, x, 1)))
   
-            
-            
+        print(all_commands[9060].command_detail.posX)
+        print(all_commands[9060].command_detail.posY)
+        currPos = PlotterPosition(0, 0, 0)
+        totalDistance = 0    
+        for com in all_commands:
+            dist = max(abs(currPos.posX - com.command_detail.posX), abs(currPos.posY - com.command_detail.posY))
+            currPos = com.command_detail
+            totalDistance = totalDistance + dist
+
+        print(f"TOTAL DISTANCE {totalDistance}")
         plotter = self.plotter_repository.get_plotter()
-        plotter.add_project(Project(arg1.name, True, ProjectStatus.Ready, all_commands, all_commands, img, img, img.shape))
-        self.plotter_repository.update_plotter(plotter)            
-        optimize_project = OptimizeProject(arg1.name, all_commands, all_commands, img)
+        plotter.add_project(Project(arg1.name, True, ProjectStatus.Ready, all_commands, all_commands, None, thresh_img, thresh_img, img.shape, totalDistance, 0))
+        self.plotter_repository.update_plotter(plotter)
+        optimize_project = OptimizeProject(arg1.name, all_commands, all_commands, thresh_img)
         pub.sendMessage(EventsName.ProjectAdded, arg1=optimize_project)
+        

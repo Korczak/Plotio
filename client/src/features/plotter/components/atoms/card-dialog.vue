@@ -1,11 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      v-model="dialog"
-      :width="width"
-      :max-width="maxWidth"
-      :persistent="persistent"
-    >
+    <v-dialog v-model="dialog" :max-width="maxWidth" :persistent="persistent">
       <v-card>
         <slot name="card">
           <slot name="title">
@@ -31,7 +26,6 @@ export default class CardDialog extends Vue {
   @Prop() readonly title!: string;
   @Prop({ default: false }) readonly persistent!: boolean;
   @Prop({ default: 600 }) readonly maxWidth!: number;
-  @Prop() readonly width!: number;
   @VModel({ type: Boolean }) dialog: boolean | undefined;
 }
 </script>

@@ -17,7 +17,7 @@ def get_nearest_object(current_position: PlotterPosition, command_groups: List[C
         commands = command_group.commands
         if len(command_group.commands) > max_num_of_neighbors:
             commands = command_group.commands[:max_num_of_neighbors]
-        possible_position = [get_distance(Point(command.command_detail.posX, command.command_detail.posY, command.command_detail.hitCount), Point(current_position.posX, current_position.posY, current_position.hitCount)) for command in commands]
+        possible_position = [get_distance(Point(command.command_detail.posX, command.command_detail.posY, command.command_detail.isHit), Point(current_position.posX, current_position.posY, current_position.isHit)) for command in commands]
         
         possible_position_min_id = np.argmin(possible_position)
         

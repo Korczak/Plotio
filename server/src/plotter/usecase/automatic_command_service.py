@@ -33,36 +33,49 @@ class AutomaticCommandService:
 
     async def send_to_controller(self):
         while(True):
-            plotter = self.plotter_repository.get_plotter()
-            command = plotter.get_next_command()
-            if(command is not None and command.can_send_command()):
-                #print("Automatic command service")
-                if(command.try_send_command()):
-                    plotter.send_current_command()
-                    
-                    controller = Controller(mode = Mode.Automatic, plotter= plotter)
-                    if(plotter.is_work_mode()):
-                        self.actual_plotter.send_command(command.command_detail)
-                    else:
-                        self.simulation_plotter.send_command(command.command_detail)
-                        
-                    
-                    self.plotter_repository.update_plotter(plotter)
-
+            await self._send_to_controller()
             await asyncio.sleep(0.1)
+
+    async def _send_to_controller(self):
+        plotter = self.plotter_repository.get_plotter()
+        command = plotter.get_next_command()
+        #print(f"KOMENDA DO WYSYLKI: {command}")
+        #if command is not None:
+        #    print(command.status)
+        #print(command.can_send_command())
+        if(command is not None and command.can_send_command()):
+            if(command.try_send_command()):
+                plotter.send_current_command()
+                
+                controller = Controller(mode = Mode.Automatic, plotter= plotter)
+                #print(f"KOMENDA DO WYSLANIA: {command.command_detail.posX}")
+                if(plotter.is_work_mode()):
+                    self.actual_plotter.send_command(command.command_detail)
+                else:
+                    self.simulation_plotter.send_command(command.command_detail)
+                    
+                
+
+        self.plotter_repository.update_plotter(plotter)
+        del plotter
 
     async def receive_from_controller(self):
         while(True):
-            plotter = self.plotter_repository.get_plotter()
-            current_command = plotter.get_current_command()
-            plotter_position: PlotterPosition = None
-            
-            is_response_received = True
-            while(is_response_received):            
-                is_response_received = await self.receive_response(plotter, current_command, plotter_position)
-                await asyncio.sleep(0.00001)
+            await self.receive_response_from_controller()
 
             await asyncio.sleep(0.1)
+
+    async def receive_response_from_controller(self):
+        plotter = self.plotter_repository.get_plotter()
+        current_command = plotter.get_current_command()
+        plotter_position: PlotterPosition = None
+        
+        is_response_received = True
+        while(is_response_received):            
+            is_response_received = await self.receive_response(plotter, current_command, plotter_position)
+            await asyncio.sleep(0.00001)
+            
+        del plotter
 
     async def receive_response(self, plotter: Plotter, current_command: Command, plotter_position: PlotterPosition) -> bool:
         is_response_received = False;

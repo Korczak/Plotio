@@ -29,9 +29,9 @@
         <v-row>
           <v-col cols="9">
             <v-text-field
-              v-model="speedOfZ"
+              v-model="hitCount"
               type="number"
-              label="Zagłębienie"
+              label="Liczba uderzeń"
               hide-details
             ></v-text-field>
             <v-text-field
@@ -40,19 +40,26 @@
               label="Prędkość obróbki XY"
               hide-details
             ></v-text-field>
+            <v-text-field
+              v-model="pixelDensity"
+              type="number"
+              label="Liczba kroków na piksel"
+              hide-details
+            ></v-text-field>
           </v-col>
           <v-col cols="3" class="px-0">
             <v-btn
               color="success"
               class="px-2 mt-5"
               max-width="80px"
-              height="80px"
+              height="120px"
               @click="setPlotterSettings"
               >Zapisz</v-btn
             >
           </v-col>
         </v-row>
       </v-container>
+      <automatic-mode-block-card></automatic-mode-block-card>
     </v-card>
     <connect-dialog
       :dialog.sync="dialog"
@@ -68,18 +75,22 @@ import {
   isConnectedPlotterPlotterPlotterConnectGet,
   setModePlotterPlotterModePost,
   setPlotterSettingsPlotterPlotterSettingsPost,
+  getPlotterSettingsPlotterPlotterSettingsGet
 } from "@/api/index";
 import { Component, Vue } from "vue-property-decorator";
 import ConnectDialog from "./connect_dialog.vue";
+import AutomaticModeBlockCard from "./automatic_mode_block_card.vue";
 
-@Component({ components: { ConnectDialog } })
+
+@Component({ components: { ConnectDialog, AutomaticModeBlockCard } })
 export default class PlotterMode extends Vue {
   plotterMode: "Simulation" | "Work" = "Simulation";
   isConnected: boolean = false;
   dialog: boolean = false;
 
   speedOfMotors: number = 0;
-  speedOfZ: number = 0;
+  hitCount: number = 0;
+  pixelDensity: number = 0;
 
   error: boolean = false;
   errorMessage: string = "";
@@ -87,6 +98,11 @@ export default class PlotterMode extends Vue {
   async mounted() {
     let plotterMode = await getModePlotterPlotterModeGet();
     let isConnected = await isConnectedPlotterPlotterPlotterConnectGet();
+    const settings = await getPlotterSettingsPlotterPlotterSettingsGet();
+
+    this.speedOfMotors = settings.data.speedOfMotors;
+    this.hitCount = settings.data.hitCount;
+    this.pixelDensity = settings.data.pixelDensity;
 
     this.plotterMode = plotterMode.data;
     this.isConnected = isConnected.data;
@@ -128,7 +144,8 @@ export default class PlotterMode extends Vue {
     const response = await setPlotterSettingsPlotterPlotterSettingsPost({
       body: {
         speedOfMotors: this.speedOfMotors,
-        speedOfZ: this.speedOfZ,
+        hitCount: this.hitCount,
+        pixelDensity: this.pixelDensity,
       },
     });
 

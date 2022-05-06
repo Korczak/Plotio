@@ -5,9 +5,7 @@ from config.container import *
 from dependency_injector.wiring import Provide, inject
 
 from config.shared import dependency
-from src.image.usecase.add_image_service import AddImageInput, AddImageService
-from src.image.usecase.edit_image_service import EditImageService, ImageAttributeInput
-from src.image.usecase.image_preview_service import ImagePreviewService
+from src.image.usecase.add_image_service import AddImageInput, AddImageService, AddImageResult
 
 router = APIRouter(
     prefix="/image",
@@ -21,26 +19,11 @@ router = APIRouter(
 #async def get_plotters(repository: PlotterRepository = dependency(Container.plotter.plotter_repository)):
 #    return repository.getAll()
 
-@router.post("/add-image")
+@router.post("/add-image", response_model=AddImageResult)
 @inject
 async def add_image(input: AddImageInput, service: AddImageService = dependency(Container.image.add_image_service)):
-    service.add_image(input)
-    
-@router.post("/edit-image")
-@inject
-async def edit_image(input: ImageAttributeInput, service: EditImageService = dependency(Container.image.edit_image_service)):
-    service.edit_image_attributes(input)
+    return service.add_image(input)
 
-@router.post("/approve-image")
-@inject
-async def approve_image(service: EditImageService = dependency(Container.image.edit_image_service)):
-    service.approve_image()
-
-@router.get("/preview")
-@inject
-async def get_image_preview(service: ImagePreviewService = dependency(Container.image.image_preview_service)):
-    image_str = service.get_image()
-    return image_str
 
 
 # @socketio.event

@@ -53,8 +53,8 @@ export default class ConnectDialog extends Vue {
 
   port: string | null = null;
   ports: string[] = ["COM1", "COM2", "COM3", "COM4", "COM5", "COM6"];
-  baudrate: number = 9600;
-  timeout: number = 0.1;
+  baudrate: number = 115200;
+  timeout: number = 0.01;
   connecting: boolean = false;
   error: boolean = false;
   errorMessage: string | null = "";

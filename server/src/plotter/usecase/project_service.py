@@ -32,6 +32,7 @@ class ProjectService:
         plotter = self.plotter_repository.get_plotter()
         plotter.pause_project()
         self.plotter_repository.update_plotter(plotter)
+        print("PAUZA")
 
 
 

@@ -2,10 +2,12 @@
   <div>
     <v-card>
       <v-row class="pt-2">
-        <v-col cols="6">
+        <v-col cols="12">
           <manual-steering-buttons></manual-steering-buttons>
         </v-col>
-        <v-col cols="6">
+      </v-row>
+      <v-row class="pt-2">
+        <v-col cols="12">
           <manual-steering-position class="mr-3"></manual-steering-position>
         </v-col>
       </v-row>

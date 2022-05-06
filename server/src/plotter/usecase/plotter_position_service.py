@@ -35,6 +35,7 @@ class PlotterPositionService:
         if arg1.alarmStatus == False and plotter.is_alarm_active():
             plotter.alarm.disable_alarm()
         self.plotter_repository.update_plotter(plotter)
+        #del plotter
         
     def on_command_done(self, arg1: PlotterResponse):
         plotter = self.plotter_repository.get_plotter()
@@ -43,12 +44,13 @@ class PlotterPositionService:
             plotter.alarm.disable_alarm()
         plotter.complete_current_command()
         
+        #print(plotter.work_mode)
         command = plotter.get_next_command()
         
         if(command is not None and command.can_send_command()):
             if(command.try_send_command()):
                 plotter.send_current_command()
-                
+                #print("WYSLIJ KOMENDE PO ZAKONCZENIU")
                 if(plotter.is_work_mode()):
                     self.actual_plotter.send_command(command.command_detail)
                 else:
@@ -57,4 +59,6 @@ class PlotterPositionService:
         if(plotter.project.is_completed_project()):
             self.alert_repository.add_alert(Alert("Ukończono projekt", AlertType.Success))
         
+        #print("Aktualizuj ploter")
         self.plotter_repository.update_plotter(plotter)
+        #del plotter

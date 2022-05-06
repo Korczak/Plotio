@@ -1,6 +1,6 @@
 <template>
   <div>
-    <bar title="Szacowany czas i postęp pracy">
+    <bar>
       <v-progress-linear
         :value="commandProcess"
         height="25"
@@ -9,6 +9,13 @@
       >
         <strong>{{ commandProcess.toFixed(2) }}%</strong>
       </v-progress-linear>
+    </bar>
+    <bar>
+      <v-template v-slot:title>
+        Szacowany czas
+      </v-template>
+      <strong>{{ (durationLeft/60).toFixed(0) }} h {{ (durationLeft%60).toFixed(0) }} m</strong>
+      {{ durationLeft.toFixed(2) }}
     </bar>
   </div>
 </template>
@@ -22,6 +29,7 @@ import RetrieverLoop from "../atoms/retriever-loop";
 export default class ProcessBar extends Mixins(RetrieverLoop) {
   commandsCompleted: number = 0;
   allCommands: number = 0;
+  durationLeft: number = 0;
 
   mounted() {
     this.retrieve_loop(this.getProgress);
@@ -32,6 +40,7 @@ export default class ProcessBar extends Mixins(RetrieverLoop) {
 
     this.commandsCompleted = progressInfo.data.commandsDone;
     this.allCommands = progressInfo.data.commandsTotal;
+    this.durationLeft = progressInfo.data.durationLeft;
   }
 
   get commandProcess(): number {

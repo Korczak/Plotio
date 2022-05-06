@@ -99,8 +99,8 @@ class Plotter:
         return self.status == PlotterStatus.Connected
 
     def get_current_command(self) -> Command:
-        if(self.work_mode != WorkMode.Automatic):
-            return None
+        #if(self.work_mode != WorkMode.Automatic):
+        #    return None
         if(self.project is None):
             return None
         if(self.project.is_active is False):

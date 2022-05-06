@@ -2,16 +2,19 @@
   <div>
     <v-card>
       <v-card-title class="justify-center">
-        <span>Współrzędne </span>
+        <span>Status </span>
       </v-card-title>
       <div>
         <v-row>
-          <v-col cols="3">X:</v-col>
-          <v-col cols="9">{{ plotterPosition.x }}</v-col>
+          <v-col cols="2">X:</v-col>
+          <v-col cols="4">{{ plotterPosition.x }}</v-col>
+          <v-col cols="2">Y:</v-col>
+          <v-col cols="4">{{ plotterPosition.y }}</v-col>
         </v-row>
         <v-row>
-          <v-col cols="3">Y:</v-col>
-          <v-col cols="9">{{ plotterPosition.y }}</v-col>
+          <v-col cols="12">
+            <process-bar></process-bar>
+          </v-col>
         </v-row>
       </div>
     </v-card>
@@ -22,8 +25,9 @@
 import { getPositionPlotterPositionGet } from "@/api/index";
 import { Component, Vue } from "vue-property-decorator";
 import Position from "../atoms/position";
+import ProcessBar from "../molecules/process_bar.vue";
 
-@Component({ components: {} })
+@Component({ components: {ProcessBar} })
 export default class Coordinates extends Vue {
   plotterPosition: Position = { x: 0, y: 0 };
   positionLoop: boolean = true;

@@ -12,11 +12,13 @@ class PlotterSettingsResponse(BaseModel):
     
 class PlotterSettingsInput(BaseModel):
     speedOfMotors: int
-    speedOfZ: int
+    hitCount: int
+    pixelDensity: int
     
 class PlotterSettingsModel(BaseModel):
     speedOfMotors: int
-    speedOfZ: int
+    hitCount: int
+    pixelDensity: int
     
     
 class PlotterSettingsService:
@@ -26,11 +28,11 @@ class PlotterSettingsService:
 
     async def get_settings(self) -> PlotterSettingsModel:
         settings = self.settings_repository.get_settings()
-        return PlotterSettingsModel(speedOfMotors=settings.speed_of_motors, speedOfZ=settings.speed_of_Z)
+        return PlotterSettingsModel(speedOfMotors=settings.speed_of_motors, hitCount=settings.hit_count, pixelDensity=settings.pixel_density)
     
     async def set_settings(self, settings: PlotterSettingsInput) -> PlotterSettingsResponse:
         if(self.actual_plotter.is_connected()):
-            self.actual_plotter.send_settings(PlotterSettings(settings.speedOfMotors, settings.speedOfZ))
+            self.actual_plotter.send_settings(PlotterSettings(settings.speedOfMotors, settings.hitCount, settings.pixelDensity))
             return PlotterSettingsResponse(is_success=True, message="")
             
         return PlotterSettingsResponse(is_success=False, message="Plotter nie jest połączony")

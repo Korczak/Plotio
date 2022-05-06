@@ -40,7 +40,7 @@ class PlotterModule(containers.DeclarativeContainer):
     project_service = providers.Singleton(ProjectService, plotter_repository=plotter_repository, project_repository = project_repository, alert_repository=alert_repository)
     project_save_service = providers.Singleton(ProjectSaveService, plotter_repository=plotter_repository, project_repository = project_repository)
     alert_service = providers.Singleton(AlertService, alert_repository=alert_repository)    
-    progress_info_service = providers.Singleton(ProgressInfoService, plotter_repository=plotter_repository)
+    progress_info_service = providers.Singleton(ProgressInfoService, plotter_repository=plotter_repository, plotter_settings_repository = plotter_settings_repository)
     alarm_service = providers.Singleton(AlarmService, alarm_repository=alarm_repository, plotter_repository = plotter_repository)
 
     

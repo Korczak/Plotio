@@ -108,18 +108,6 @@ export function addImageImageAddImagePost(params) {
   return request("post", `/image/add-image`, { "header": { "accept": "application/json", "Content-Type": "application/json", }, })(params);
 }
 
-export function editImageImageEditImagePost(params) {
-  return request("post", `/image/edit-image`, { "header": { "accept": "application/json", "Content-Type": "application/json", }, })(params);
-}
-
-export function approveImageImageApproveImagePost() {
-  return request("post", `/image/approve-image`, { "header": { "Content-Type": "application/json", }, })();
-}
-
-export function getImagePreviewImagePreviewGet() {
-  return request("get", `/image/preview`, { "header": { "Content-Type": "application/json", }, })();
-}
-
 export function optimizeProjectOptimizeOptimizeProjectActualPost() {
   return request("post", `/optimize/optimize/project/actual`, { "header": { "Content-Type": "application/json", }, })();
 }

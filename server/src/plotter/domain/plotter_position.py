@@ -1,7 +1,7 @@
 
 
 class PlotterPosition:
-    def __init__(self, posX: float, posY: float, hitCount: int) -> None:
+    def __init__(self, posX: float, posY: float, isHit: 0 | 1) -> None:
         self.posX: float = posX
         self.posY: float = posY
-        self.hitCount: int = hitCount
+        self.isHit: 0 | 1 = isHit
