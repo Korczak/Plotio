@@ -107,6 +107,7 @@ class Project:
 
         self.image_with_processed_commands[self.commands_to_do[0].command_detail.posY, self.commands_to_do[0].command_detail.posX] = 125
         self.previous_command = self.commands_to_do[0]
+
         self.commands_to_do[0].complete_command()
         self.commands_to_do.pop(0)
         if len(self.commands_to_do) == 0:

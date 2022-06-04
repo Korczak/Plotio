@@ -55,7 +55,7 @@ class OptimizeProject:
         self.command_groups = commandGroups
         self.labels = labels
          
-        initial_solution = [Point(point.command_detail.posX, point.command_detail.posY, point.command_detail.isHit) for point in self.all_commands]
+        initial_solution = [Point(point.command_detail.posX, point.command_detail.posY, point.command_detail.hitTimes) for point in self.all_commands]
         
         optimized_commands = None
         
@@ -148,11 +148,11 @@ class OptimizeProject:
         
         optimized_commands: List[Command] = []
         for command_group in solution:
-            optimized_commands = optimized_commands + [Command(PlotterPosition(command.command_detail.posX, command.command_detail.posY, command.command_detail.isHit)) for command in command_group.commands]
+            optimized_commands = optimized_commands + [Command(PlotterPosition(command.command_detail.posX, command.command_detail.posY, command.command_detail.hitTimes)) for command in command_group.commands]
         
         non_optimized_commands: List[Command] = []
         for command_group in init_solution:
-            non_optimized_commands = non_optimized_commands + [Command(PlotterPosition(command.command_detail.posX, command.command_detail.posY, command.command_detail.isHit)) for command in command_group.commands]
+            non_optimized_commands = non_optimized_commands + [Command(PlotterPosition(command.command_detail.posX, command.command_detail.posY, command.command_detail.hitTimes)) for command in command_group.commands]
         
         print(f"Normal: {calculate_value_of_commands(non_optimized_commands)}, Optimized: {calculate_value_of_commands(optimized_commands)}")
         return optimized_commands

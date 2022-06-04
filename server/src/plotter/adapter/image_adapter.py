@@ -27,24 +27,42 @@ class ImageAdapter:
         b64 = urlsafe_b64decode(str(arg1.content)); 
         npimg = np.fromstring(b64, dtype=np.uint8); 
         img = cv2.imdecode(npimg, 0)
-        threshold = 128
+        min_threshold = 10
+        max_threshold = 240
+        thresh_img = np.zeros((img.shape[0], img.shape[1]))
+        two_times_val = 0
+        one_time_val = 50
+        zero_time_val = 255
         
-        ret, thresh_img = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY)
+        for x in range(0, img.shape[0]):
+            for y in range(0, img.shape[1]):
+                if img[x, y] < min_threshold:
+                    thresh_img[x, y] = two_times_val
+                elif img[x, y] < max_threshold:
+                    thresh_img[x, y] = one_time_val
+                else:
+                    thresh_img[x, y] = zero_time_val
         
-        object_color = 0
+        
         all_commands: List[Command] = []
         for x in range(0, img.shape[0]):
             if x % 2 == 0:
                 for y in range(0, img.shape[1]):
-                    if(thresh_img[x, y] == object_color):
-                        all_commands.append(Command(PlotterPosition(y, x, 1)))
+                    if(thresh_img[x, y] != zero_time_val):
+                        if(thresh_img[x, y] == one_time_val):
+                            all_commands.append(Command(PlotterPosition(y, x, 1)))
+                        elif(thresh_img[x, y] == two_times_val):
+                            all_commands.append(Command(PlotterPosition(y, x, 2)))
             else:
                 for y in range(img.shape[1] - 1, 0, -1):
-                    if(thresh_img[x, y] == object_color):
-                        all_commands.append(Command(PlotterPosition(y, x, 1)))
+                    if(thresh_img[x, y] != zero_time_val):
+                        if(thresh_img[x, y] == one_time_val):
+                            all_commands.append(Command(PlotterPosition(y, x, 1)))
+                        elif(thresh_img[x, y] == two_times_val):
+                            all_commands.append(Command(PlotterPosition(y, x, 2)))
   
-        print(all_commands[9060].command_detail.posX)
-        print(all_commands[9060].command_detail.posY)
+        #print(all_commands[9060].command_detail.posX)
+        #print(all_commands[9060].command_detail.posY)
         currPos = PlotterPosition(0, 0, 0)
         totalDistance = 0    
         for com in all_commands:

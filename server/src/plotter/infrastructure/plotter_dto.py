@@ -9,5 +9,5 @@ class PlotterDto:
         self.workMode = workMode
         self.posX: float = position.posX
         self.posY: float = position.posY
-        self.isHit: 0 | 1 = position.isHit
+        self.hitTimes: 0 | 1 = position.hitTimes
         self.urgent_command: Command = urgent_command
