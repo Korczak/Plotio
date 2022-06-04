@@ -25,8 +25,8 @@ class AddImageService:
         base64Image = new_image.content.split(',')
         image = Image(new_image.name, base64Image[len(base64Image) - 1])
 
-        if not image.is_binary():
-            return AddImageResult.ImageNotBinaryError
+        #if not image.is_binary():
+        #    return AddImageResult.ImageNotBinaryError
 
         if not image.is_size_ok(400, 500):
             return AddImageResult.ImageTooBigError
